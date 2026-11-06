@@ -13,7 +13,7 @@ records whether it was **Verified**, **Not verified**, or **Recurred**.
 
 | Name | UNI |
 |---|---|
-| Zoe Li | `UNI:` WL3019 |
+| `Zoe Li` | `UNI:` WL3019 |
 | `Silin Jiang` | `UNI:` sj3484 |
 | `Tianming Hao` | `UNI:` th3016 |
 | `Jessica Song` | `UNI:` ys3815 |
