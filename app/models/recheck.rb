@@ -1,6 +1,3 @@
-# A relative's own check of a concern on a later visit. The relative must
-# be someone other than the person who opened the concern, so follow-up
-# does not depend on one person coming back.
 class Recheck < ApplicationRecord
   RESULTS = %w[verified not_verified recurred].freeze
 
@@ -25,6 +22,7 @@ class Recheck < ApplicationRecord
     errors.add(:base, "#{result_label} can't be recorded while the concern is #{care_concern.status_label}")
   end
 
+  # A different relative rechecks so follow-up doesn't depend on one person returning.
   def checked_by_a_different_relative
     return if care_concern.nil? || checked_by.blank?
     return unless checked_by.strip.casecmp?(care_concern.opened_by.to_s.strip)

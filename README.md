@@ -1,36 +1,25 @@
-# FollowThrough: Because "Fixed" Should Mean Verified
+# FollowThrough
 
-FollowThrough is a web app for families whose loved one lives in a nursing home
-or assisted living facility. When staff say a care problem is fixed, the family
-keeps that as **"Reported fixed"**, not resolved. On the next visit, a
-**different relative** checks it against the resident's **Signal Card** and
-records whether it was **Verified**, **Not verified**, or **Recurred**.
-
-- **Heroku:** `https://YOUR-APP-NAME.herokuapp.com` (replace after deploying)
-- **GitHub:** `https://github.com/YOUR-ACCOUNT/followthrough`
+FollowThrough helps families keep track of care concerns for someone in a nursing home or assisted living facility. When staff say they've fixed a problem, the family records what they said and marks the concern **Reported fixed**. On the next visit, a different relative checks the fix and records what they saw. The concern becomes **Verified** only when a relative confirms the fix.
 
 ## Team
 
 | Name | UNI |
-|---|---|
-| `Zoe Li` | `UNI:` wl3019 |
-| `Silin Jiang` | `UNI:` sj3484 |
-| `Tianming Hao` | `UNI:` th3016 |
-| `Jessica Song` | `UNI:` ys3815 |
+| --- | --- |
+| Zoe Li | wl3019 |
+| Silin Jiang | sj3484 |
+| Tianming Hao | th3016 |
+| Jessica Song | ys3815 |
 
-## Iteration 1 scope
+## Iteration 1
 
-The most basic features of the product, end to end:
+- [Family profile](features/1_family_profile.feature). Add a resident, browse all profiles, and see each resident's Signal Card and concerns.
+- [Signal Card](features/2_signal_card.feature). Add, edit, or remove notes on how the resident shows a need and what to check.
+- [Concerns](features/3_open_concern.feature). Record a problem, describe what "fixed" would look like, and link it to a signal if there is one.
+- [Staff responses](features/4_staff_response.feature). Record who spoke to the family, what they said, and when.
+- [Rechecks](features/5_recheck.feature). Use the linked Signal Card checklist, if there is one, and record what you found.
 
-| Feature | What a user can do | User stories |
-|---|---|---|
-| Shared family profile | Create a profile for a loved one, see all profiles | `features/1_family_profile.feature` |
-| Signal Card | Add, edit and remove how she shows a need and what to check | `features/2_signal_card.feature` |
-| Concerns | Open a concern with a "what fixed looks like" goal, linked to a signal | `features/3_open_concern.feature` |
-| Staff responses | Record who said what and when, which marks the concern Reported fixed | `features/4_staff_response.feature` |
-| Rechecks | A different relative checks with the Signal Card checklist and records the result | `features/5_recheck.feature` |
-
-### Concern status rules
+### Concern status
 
 ```
 open ──staff response──> reported_fixed ──recheck──> verified ──recheck──> recurred
@@ -38,81 +27,66 @@ open ──staff response──> reported_fixed ──recheck──> verified �
                                └──recheck──> not_verified
 ```
 
-- A staff response can be recorded while a concern is **Open**, **Not verified** or **Recurred**. It always moves the concern to **Reported fixed**.
-- From **Reported fixed**, a recheck can be **Verified** or **Not verified**.
-- From **Verified**, a recheck can only be **Recurred** (the problem came back).
-- The person who checks must be **someone other than the relative who opened the concern**.
+A new staff response moves a **Not verified** or **Recurred** concern back to **Reported fixed**. Once a fix is **Verified**, a recheck can only record that the problem came back. The relative who opened the concern can't record its recheck.
 
-These rules live in `app/models/care_concern.rb`, `app/models/staff_response.rb` and `app/models/recheck.rb`, and are covered by the model specs.
+See the status rules and tests in [CareConcern](app/models/care_concern.rb), [StaffResponse](app/models/staff_response.rb), [Recheck](app/models/recheck.rb), and the [model specs](spec/models/).
 
-Planned for iteration 2: sign in, inviting relatives with roles, assigning
-rechecks to the next visitor, a family dashboard, and the one-page meeting brief.
+Iteration 2 plans include sign-in, family invitations with roles, recheck assignments for the next visitor, a dashboard, and a one-page meeting brief.
 
-## Tech stack
+## Run locally
 
-- Ruby 3.3.8, Rails 7.2
-- SQLite in development and test, PostgreSQL on Heroku
-- Cucumber + Capybara for user stories, RSpec for unit and request tests, SimpleCov for coverage
-
-## Run it locally
-
-Requires Ruby 3.3.8 (for example through rbenv, as in hw-setup) and Bundler.
+Install Ruby 3.3.8 and Bundler. You can use rbenv as in `hw-setup`. The app uses Rails 7.2 and SQLite locally.
 
 ```bash
-git clone https://github.com/YOUR-ACCOUNT/followthrough.git
+git clone https://github.com/Zoeooeo/followthrough.git
 cd followthrough
-bundle config set --local without production   # skip the pg gem locally
-bin/setup                                       # installs gems, creates databases, loads sample data
+bundle config set --local without production  # skip the pg gem locally
+bin/setup                                     # install gems, prepare databases, load sample data
 bin/rails server
 ```
 
-Open http://localhost:3000. The sample data includes Linda Chen with two signals,
-one concern that is Reported fixed (ready for a recheck) and one that is Open.
+Open [localhost:3000](http://localhost:3000) and select Linda Chen. The sample data has two signals and two concerns. Open **Water cup out of reach** to try a recheck.
 
-## Run the tests
+## Tests
 
 ```bash
-bin/rails db:test:prepare     # only needed the first time or after a new migration
-bundle exec cucumber          # user stories
-bundle exec rspec             # model and request specs
+bin/rails db:test:prepare # First setup or after a new migration
+bundle exec cucumber
+bundle exec rspec
 ```
 
-Both commands write to the same coverage report. Run both, then open
-`coverage/index.html` to see the combined coverage.
+Cucumber and Capybara run through the family workflows. RSpec covers models and HTTP requests. SimpleCov combines both runs in `coverage/index.html`.
 
 ## Deploy to Heroku
 
+Heroku uses PostgreSQL. Before deploying, generate and commit `Gemfile.lock` with the Linux platform.
+
+```bash
+bundle lock --add-platform x86_64-linux --add-platform ruby
+git add Gemfile.lock
+git commit -m "Add Gemfile.lock for Heroku"
+```
+
 ```bash
 heroku login
-heroku create YOUR-APP-NAME
+heroku create
 heroku addons:create heroku-postgresql:essential-0
-git push heroku main          # the release phase in Procfile runs db:migrate
-heroku run bin/rails db:seed  # optional demo data
+git push heroku main
 heroku open
 ```
 
-`Gemfile.lock` must be committed. If you created it on a Mac, add the Linux
-platform Heroku builds on before pushing:
+The release command in [Procfile](Procfile) runs the migrations. To load the demo data, run `heroku run bin/rails db:seed`. If Heroku asks for `SECRET_KEY_BASE`, run `heroku config:set SECRET_KEY_BASE="$(bin/rails secret)"`.
 
-```bash
-bundle lock --add-platform x86_64-linux
-git add Gemfile.lock && git commit -m "Add Linux platform for Heroku"
-```
-
-If Heroku reports a missing `SECRET_KEY_BASE`, set one:
-
-```bash
-heroku config:set SECRET_KEY_BASE=$(bin/rails secret)
-```
+See the [Heroku Rails 7 guide](https://devcenter.heroku.com/articles/getting-started-with-rails7) for deployment setup.
 
 ## Project structure
 
 ```
 app/models/          Resident, SignalItem, CareConcern, StaffResponse, Recheck
-app/controllers/     One controller per resource, nested under residents
+app/controllers/     Resource controllers. Child routes are nested under /residents/:resident_id.
 app/views/           Server-rendered pages, no JavaScript required
 db/migrate/          Table definitions
 features/            Cucumber user stories and step definitions
 spec/models/         Validation and status-rule tests
-spec/requests/       Controller behaviour through HTTP requests
+spec/requests/       HTTP request tests
 ```

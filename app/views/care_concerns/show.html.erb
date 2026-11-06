@@ -35,7 +35,7 @@
       <div class="field">
         <%= form.label :checked_by %>
         <%= form.text_field :checked_by, placeholder: "Your name" %>
-        <p class="hint">Should be someone other than <%= @care_concern.opened_by %>, who opened this concern.</p>
+        <p class="hint">Any relative except <%= @care_concern.opened_by %> can record this recheck.</p>
       </div>
 
       <fieldset class="field">
@@ -61,7 +61,7 @@
 <% if @care_concern.awaiting_staff? %>
   <section id="staff-response-form" class="panel staff">
     <h2 style="margin-top: 0">Record what staff said</h2>
-    <p class="hint">Saving marks this concern Reported fixed, not resolved, until a relative rechecks it.</p>
+    <p class="hint">Saving changes the status to Reported fixed. A relative still needs to check the fix.</p>
 
     <%= form_with model: @staff_response, url: resident_care_concern_staff_responses_path(@resident, @care_concern) do |form| %>
       <div class="field">
