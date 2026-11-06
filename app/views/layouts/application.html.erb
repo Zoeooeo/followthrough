@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title><%= content_for?(:title) ? "#{yield(:title)} | FollowThrough" : "FollowThrough" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <style>
+      :root {
+        --ink: #222; --muted: #555; --line: #c9c4b8; --paper: #fbf9f3;
+        --blue: #1f4a87; --orange: #8a4a0a; --green: #1f6b4a; --red: #8a2a1d;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: var(--paper); color: var(--ink);
+             font: 18px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+      header.site { background: #fff; border-bottom: 2px solid var(--ink); padding: 12px 16px;
+                    display: flex; flex-wrap: wrap; gap: 4px 16px; align-items: baseline; }
+      header.site .brand { font-size: 24px; font-weight: 700; color: var(--blue); text-decoration: none; }
+      header.site .tagline { color: var(--muted); font-size: 16px; }
+      main { max-width: 760px; margin: 0 auto; padding: 16px 16px 48px; }
+      h1 { font-size: 30px; margin: 8px 0; }
+      h2 { font-size: 22px; margin: 28px 0 8px; }
+      a { color: var(--blue); }
+      .muted { color: var(--muted); }
+      .flash { padding: 10px 14px; border-radius: 6px; border: 2px solid; }
+      .flash.notice { border-color: var(--green); background: #eaf4ee; }
+      .flash.alert, .errors { border: 2px solid var(--red); background: #fbe9e6; padding: 10px 14px; border-radius: 6px; }
+      .errors ul { margin: 4px 0 0; }
+      .disclaimer { border: 1.5px dashed #777; background: #fff; padding: 8px 12px; border-radius: 6px; }
+      .card { background: #fff; border: 1.5px solid var(--ink); border-radius: 8px; padding: 12px 14px; margin: 10px 0; }
+      .card h3 { margin: 0 0 4px; font-size: 20px; }
+      .card .label { font-size: 14px; letter-spacing: .5px; text-transform: uppercase; color: var(--muted); margin: 8px 0 2px; }
+      .card ul { margin: 2px 0; padding-left: 22px; }
+      .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 8px; }
+      .list { list-style: none; padding: 0; margin: 0; }
+      .list li { display: flex; justify-content: space-between; gap: 12px; align-items: center;
+                 padding: 10px 2px; border-bottom: 1.5px dashed var(--line); }
+      .badge { display: inline-block; font-size: 15px; padding: 2px 10px; border-radius: 12px; border: 2px solid; white-space: nowrap; }
+      .badge-open { border-color: var(--ink); background: #fff; }
+      .badge-reported-fixed { border-style: dashed; border-color: var(--orange); color: var(--orange); background: #fff; }
+      .badge-verified { border-color: var(--green); color: #fff; background: var(--green); }
+      .badge-not-verified { border-color: var(--red); color: var(--red); background: #fbe0dc; }
+      .badge-recurred { border-color: var(--red); color: var(--red); background: #fff; }
+      form .field { margin: 12px 0; }
+      form label { display: block; font-weight: 600; margin-bottom: 4px; }
+      form .radio label { display: inline; font-weight: 400; margin-left: 6px; }
+      input[type=text], input[type=date], textarea, select {
+        width: 100%; font: inherit; padding: 10px 12px; border: 1.5px solid var(--ink); border-radius: 6px; background: #fff; }
+      textarea { min-height: 90px; }
+      .hint { font-size: 15px; color: var(--muted); margin: 2px 0 0; }
+      .button, input[type=submit], button { display: inline-block; font: inherit; min-height: 44px; padding: 8px 18px;
+        border-radius: 6px; border: 2px solid var(--blue); background: var(--blue); color: #fff; text-decoration: none; cursor: pointer; }
+      .button.secondary, form.button_to button.secondary { background: #fff; color: var(--blue); }
+      form.button_to { display: inline; }
+      .panel { border: 2.5px solid var(--blue); background: #eef3fa; border-radius: 8px; padding: 12px 16px; margin: 16px 0; }
+      .panel.staff { border: 2.5px dashed var(--orange); background: #fff; }
+      dl dt { font-weight: 600; margin-top: 8px; }
+      dl dd { margin: 0; }
+      ol.timeline { list-style: none; padding-left: 0; border-left: 2px solid var(--ink); margin-left: 8px; }
+      ol.timeline li { position: relative; padding: 0 0 14px 18px; }
+      ol.timeline li::before { content: ""; position: absolute; left: -9px; top: 6px; width: 16px; height: 16px; border-radius: 50%; }
+      ol.timeline li.staff::before { border: 2.5px dashed var(--orange); background: #fff; }
+      ol.timeline li.family::before { background: var(--ink); }
+      ol.timeline .who { font-size: 15px; color: var(--muted); }
+      table { width: 100%; border-collapse: collapse; background: #fff; }
+      th, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--line); }
+    </style>
+  </head>
+
+  <body>
+    <header class="site">
+      <%= link_to "FollowThrough", root_path, class: "brand" %>
+      <span class="tagline">Because "fixed" should mean verified</span>
+    </header>
+
+    <main>
+      <% if notice.present? %>
+        <p class="flash notice" role="status"><%= notice %></p>
+      <% end %>
+      <% if alert.present? %>
+        <p class="flash alert" role="alert"><%= alert %></p>
+      <% end %>
+
+      <%= yield %>
+    </main>
+  </body>
+</html>

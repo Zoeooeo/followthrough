@@ -1,0 +1,21 @@
+<%= render "shared/errors", record: signal_item %>
+
+<%= form_with model: [@resident, signal_item] do |form| %>
+  <div class="field">
+    <%= form.label :need %>
+    <%= form.text_field :need, placeholder: "e.g. Thirst" %>
+  </div>
+
+  <div class="field">
+    <%= form.label :shows_by %>
+    <%= form.text_area :shows_by, placeholder: "e.g. Licks her lips, points at her mouth" %>
+  </div>
+
+  <div class="field">
+    <%= form.label :check_for %>
+    <%= form.text_area :check_for, placeholder: "Cup within reach\nCup at least half full" %>
+    <p class="hint">One item per line. Visitors see these as a checklist.</p>
+  </div>
+
+  <%= form.submit "Save signal" %>
+<% end %>

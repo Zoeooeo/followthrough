@@ -1,0 +1,3 @@
+# Family care records are private. Keep search engines out.
+User-agent: *
+Disallow: /

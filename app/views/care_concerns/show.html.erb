@@ -1,0 +1,108 @@
+<% content_for :title, @care_concern.title %>
+
+<p><%= link_to "Back to #{@resident.name}", resident_path(@resident) %></p>
+<h1><%= @care_concern.title %></h1>
+<p id="concern-status">Status: <%= status_badge(@care_concern) %></p>
+
+<%= render "shared/errors", record: @staff_response %>
+<%= render "shared/errors", record: @recheck %>
+
+<dl>
+  <dt>What fixed looks like</dt>
+  <dd><%= @care_concern.fixed_goal %></dd>
+  <dt>Opened by</dt>
+  <dd><%= @care_concern.opened_by %> on <%= @care_concern.created_at.to_date.to_fs(:long) %></dd>
+  <% if @care_concern.signal_item %>
+    <dt>Related signal</dt>
+    <dd><%= @care_concern.signal_item.need %></dd>
+  <% end %>
+</dl>
+
+<% if @care_concern.recheck_allowed? %>
+  <section id="recheck-form" class="panel">
+    <h2 style="margin-top: 0">Record a recheck</h2>
+
+    <% if @care_concern.signal_item %>
+      <p class="label"><strong>Check for (from the Signal Card)</strong></p>
+      <ul id="recheck-checklist">
+        <% @care_concern.signal_item.checklist.each do |item| %>
+          <li><%= item %></li>
+        <% end %>
+      </ul>
+    <% end %>
+
+    <%= form_with model: @recheck, url: resident_care_concern_rechecks_path(@resident, @care_concern) do |form| %>
+      <div class="field">
+        <%= form.label :checked_by %>
+        <%= form.text_field :checked_by, placeholder: "Your name" %>
+        <p class="hint">Should be someone other than <%= @care_concern.opened_by %>, who opened this concern.</p>
+      </div>
+
+      <fieldset class="field">
+        <legend><strong>What did you see?</strong></legend>
+        <% @care_concern.allowed_recheck_results.each do |result| %>
+          <div class="radio">
+            <%= form.radio_button :result, result %>
+            <%= form.label "result_#{result}", result.humanize %>
+          </div>
+        <% end %>
+      </fieldset>
+
+      <div class="field">
+        <%= form.label :note %>
+        <%= form.text_area :note %>
+      </div>
+
+      <%= form.submit "Save recheck" %>
+    <% end %>
+  </section>
+<% end %>
+
+<% if @care_concern.awaiting_staff? %>
+  <section id="staff-response-form" class="panel staff">
+    <h2 style="margin-top: 0">Record what staff said</h2>
+    <p class="hint">Saving marks this concern Reported fixed, not resolved, until a relative rechecks it.</p>
+
+    <%= form_with model: @staff_response, url: resident_care_concern_staff_responses_path(@resident, @care_concern) do |form| %>
+      <div class="field">
+        <%= form.label :staff_name %>
+        <%= form.text_field :staff_name, placeholder: "e.g. Maria R., charge nurse" %>
+      </div>
+
+      <div class="field">
+        <%= form.label :statement %>
+        <%= form.text_area :statement %>
+      </div>
+
+      <div class="field">
+        <%= form.label :said_on %>
+        <%= form.date_field :said_on %>
+      </div>
+
+      <%= form.submit "Save staff response" %>
+    <% end %>
+  </section>
+<% end %>
+
+<section id="history">
+  <h2>History</h2>
+  <ol class="timeline">
+    <li class="family">
+      <span class="who">Family · <%= @care_concern.created_at.to_date.to_fs(:long) %></span><br>
+      Opened by <%= @care_concern.opened_by %>
+    </li>
+    <% @care_concern.timeline.each do |entry| %>
+      <% if entry.is_a?(StaffResponse) %>
+        <li class="staff" id="<%= dom_id(entry) %>">
+          <span class="who">Staff said · <%= entry.staff_name %> · <%= entry.said_on.to_fs(:long) %></span><br>
+          "<%= entry.statement %>"
+        </li>
+      <% else %>
+        <li class="family" id="<%= dom_id(entry) %>">
+          <span class="who">Family saw · <%= entry.checked_by %> · <%= entry.created_at.to_date.to_fs(:long) %></span><br>
+          <strong><%= entry.result_label %></strong><%= ". #{entry.note}" if entry.note.present? %>
+        </li>
+      <% end %>
+    <% end %>
+  </ol>
+</section>

@@ -1,0 +1,25 @@
+<% content_for :title, "All concerns" %>
+
+<p><%= link_to "Back to #{@resident.name}", resident_path(@resident) %></p>
+<h1>All concerns for <%= @resident.name %></h1>
+
+<% if @care_concerns.any? %>
+  <table>
+    <thead>
+      <tr><th>Problem</th><th>Opened by</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      <% @care_concerns.each do |concern| %>
+        <tr id="<%= dom_id(concern, :row) %>">
+          <td><%= link_to concern.title, resident_care_concern_path(@resident, concern) %></td>
+          <td><%= concern.opened_by %></td>
+          <td><%= status_badge(concern) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>No concerns yet.</p>
+<% end %>
+
+<p><%= link_to "Open a concern", new_resident_care_concern_path(@resident), class: "button" %></p>

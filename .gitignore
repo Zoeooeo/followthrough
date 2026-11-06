@@ -1,0 +1,15 @@
+/.bundle
+/vendor/bundle
+
+/log/*
+/tmp/*
+!/log/.keep
+!/tmp/.keep
+
+/storage/*
+!/storage/.keep
+
+/coverage
+/config/master.key
+.env
+.DS_Store

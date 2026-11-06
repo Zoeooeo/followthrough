@@ -1,0 +1,73 @@
+<% content_for :title, @resident.name %>
+
+<p><%= link_to "Back to home", root_path %></p>
+<h1><%= @resident.name %></h1>
+<p class="muted"><%= @resident.location %></p>
+
+<section id="rechecks-due" class="panel">
+  <h2 style="margin-top: 0">Rechecks due</h2>
+  <% if @rechecks_due.any? %>
+    <ul class="list">
+      <% @rechecks_due.each do |concern| %>
+        <li id="<%= dom_id(concern, :recheck) %>">
+          <span>
+            <%= link_to concern.title, resident_care_concern_path(@resident, concern) %><br>
+            <span class="muted">Staff say it's fixed. Someone other than <%= concern.opened_by %> should check it.</span>
+          </span>
+          <%= status_badge(concern) %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p>No rechecks due right now.</p>
+  <% end %>
+</section>
+
+<section id="concerns">
+  <h2>Open concerns</h2>
+  <% if @open_concerns.any? %>
+    <ul class="list">
+      <% @open_concerns.each do |concern| %>
+        <li id="<%= dom_id(concern) %>">
+          <%= link_to concern.title, resident_care_concern_path(@resident, concern) %>
+          <%= status_badge(concern) %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p>No open concerns.</p>
+  <% end %>
+  <div class="actions">
+    <%= link_to "Open a concern", new_resident_care_concern_path(@resident), class: "button" %>
+    <%= link_to "All concerns", resident_care_concerns_path(@resident) %>
+  </div>
+</section>
+
+<section id="signal-card">
+  <h2>Signal Card</h2>
+  <p class="disclaimer">Family observations, not medical judgment. Ask staff or her doctor about anything medical.</p>
+
+  <% if @signal_items.any? %>
+    <% @signal_items.each do |signal| %>
+      <div class="card" id="<%= dom_id(signal) %>">
+        <h3><%= signal.need %></h3>
+        <p class="label">Shows it by</p>
+        <p style="margin: 0"><%= signal.shows_by %></p>
+        <p class="label">Check for</p>
+        <ul>
+          <% signal.checklist.each do |item| %>
+            <li><%= item %></li>
+          <% end %>
+        </ul>
+        <div class="actions">
+          <%= link_to "Edit", edit_resident_signal_item_path(@resident, signal) %>
+          <%= button_to "Delete", resident_signal_item_path(@resident, signal), method: :delete, class: "secondary" %>
+        </div>
+      </div>
+    <% end %>
+  <% else %>
+    <p>No signals yet. Add how she shows thirst, pain or distress.</p>
+  <% end %>
+
+  <p><%= link_to "Add a signal", new_resident_signal_item_path(@resident), class: "button" %></p>
+</section>

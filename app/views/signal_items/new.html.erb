@@ -1,0 +1,6 @@
+<% content_for :title, "Add a signal" %>
+
+<p><%= link_to "Back to #{@resident.name}", resident_path(@resident) %></p>
+<h1>Add a signal</h1>
+
+<%= render "form", signal_item: @signal_item %>

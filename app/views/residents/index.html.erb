@@ -1,0 +1,19 @@
+<% content_for :title, "Home" %>
+
+<h1>Your family</h1>
+<p class="muted">Each loved one has one private profile your family shares.</p>
+
+<% if @residents.any? %>
+  <ul class="list" id="residents">
+    <% @residents.each do |resident| %>
+      <li id="<%= dom_id(resident) %>">
+        <span><%= link_to resident.name, resident_path(resident) %></span>
+        <span class="muted"><%= resident.location %></span>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p>No profiles yet.</p>
+<% end %>
+
+<p><%= link_to "Add a loved one", new_resident_path, class: "button" %></p>

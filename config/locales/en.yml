@@ -1,0 +1,29 @@
+en:
+  activerecord:
+    models:
+      care_concern: "Concern"
+      signal_item: "Signal"
+    attributes:
+      resident:
+        name: "Name"
+        facility: "Facility"
+        room: "Room"
+      signal_item:
+        need: "Need"
+        shows_by: "Shows it by"
+        check_for: "Check for"
+      care_concern:
+        title: "Problem"
+        fixed_goal: "What fixed looks like"
+        opened_by: "Opened by"
+        signal_item: "Related signal"
+        signal_item_id: "Related signal"
+        status: "Status"
+      staff_response:
+        staff_name: "Staff member"
+        statement: "What they said"
+        said_on: "Date"
+      recheck:
+        checked_by: "Checked by"
+        result: "Result"
+        note: "Note"

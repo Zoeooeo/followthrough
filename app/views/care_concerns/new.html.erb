@@ -1,0 +1,32 @@
+<% content_for :title, "Open a concern" %>
+
+<p><%= link_to "Back to #{@resident.name}", resident_path(@resident) %></p>
+<h1>Open a concern</h1>
+<p class="muted">Something wrong that staff should fix? Say what "fixed" should look like so the next visitor can check it.</p>
+
+<%= render "shared/errors", record: @care_concern %>
+
+<%= form_with model: [@resident, @care_concern] do |form| %>
+  <div class="field">
+    <%= form.label :title %>
+    <%= form.text_field :title, placeholder: "e.g. Water cup out of reach" %>
+  </div>
+
+  <div class="field">
+    <%= form.label :fixed_goal %>
+    <%= form.text_area :fixed_goal, placeholder: "e.g. Cup on her right side, at least half full, at every visit" %>
+  </div>
+
+  <div class="field">
+    <%= form.label :opened_by %>
+    <%= form.text_field :opened_by, placeholder: "Your name" %>
+  </div>
+
+  <div class="field">
+    <%= form.label :signal_item_id %>
+    <%= form.collection_select :signal_item_id, @resident.signal_items.order(:need), :id, :need, include_blank: "None" %>
+    <p class="hint">The relative who rechecks will see this signal's checklist.</p>
+  </div>
+
+  <%= form.submit "Open concern" %>
+<% end %>
