@@ -3,7 +3,7 @@
 # and her daughter Amy rechecks it.
 module TestData
   def create_resident(name: "Linda Chen", **attrs)
-    Resident.create!({ name: name, facility: "Maple Grove", room: "214" }.merge(attrs))
+    Resident.create!({ name: name, facility: "Greenview Nursing Home", room: "214" }.merge(attrs))
   end
 
   def create_signal(resident, need: "Thirst", **attrs)
