@@ -35,7 +35,7 @@ RSpec.describe "Residents", type: :request do
       resident = Resident.last
       expect(response).to redirect_to(resident_path(resident))
       follow_redirect!
-      expect(response.body).to include("Profile created for Linda Chen.", "Greenview Nursing Home · Room 214")
+      expect(response.body).to include("Profile created for Linda Chen.", "Lives at Greenview Nursing Home, Room 214")
     end
 
     it "shows an error without a name" do
