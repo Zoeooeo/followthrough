@@ -11,7 +11,7 @@ Feature: Create a shared profile for a loved one
     And I fill in "Room" with "214"
     And I press "Create profile"
     Then I should see "Profile created for Linda Chen."
-    And I should see "Maple Grove · Room 214"
+    And I should see "Lives at Greenview Nursing Home, Room 214"
     And I should see "Signal Card"
 
   Scenario: A profile needs a name
