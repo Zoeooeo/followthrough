@@ -7,7 +7,7 @@ Feature: Create a shared profile for a loved one
     Given I am on the home page
     When I follow "Add a loved one"
     And I fill in "Name" with "Linda Chen"
-    And I fill in "Facility" with "Maple Grove"
+    And I fill in "Facility" with "Greenview Nursing Home"
     And I fill in "Room" with "214"
     And I press "Create profile"
     Then I should see "Profile created for Linda Chen."
