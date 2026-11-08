@@ -47,6 +47,10 @@ bin/rails server
 
 Open [localhost:3000](http://localhost:3000) and select Linda Chen. The sample data has two signals and two concerns. Open **Water cup out of reach** to try a recheck.
 
+### Demo data
+
+All names in the sample data and tests are fictional and used only for this class demo. This includes the resident (Linda Chen), her family members (David, Amy, Grace), the staff members, and the care facility (Greenview Nursing Home). Any resemblance to real people or facilities is coincidental.
+
 ## Tests
 
 ```bash
