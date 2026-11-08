@@ -1,16 +1,6 @@
-# A problem the family noticed during a visit, tracked until a relative
-# has seen it fixed.
-#
-# Status flow:
-#
-#   open ──staff response──> reported_fixed ──recheck──> verified
-#                                  │                         │
-#                                  └──recheck──> not_verified │
-#                                                             └──recheck──> recurred
-#
-# A staff response can be recorded while the concern is open, not_verified
-# or recurred, and always moves it to reported_fixed. "Reported fixed" is
-# never treated as resolved: only a relative's recheck can verify it.
+# open, not_verified, recurred -> reported_fixed (staff response)
+# reported_fixed -> verified or not_verified (family recheck)
+# verified -> recurred (family recheck)
 class CareConcern < ApplicationRecord
   STATUSES = %w[open reported_fixed verified not_verified recurred].freeze
   AWAITING_STAFF = %w[open not_verified recurred].freeze
@@ -29,12 +19,10 @@ class CareConcern < ApplicationRecord
     status.to_s.humanize
   end
 
-  # Staff can be asked again whenever the family has not seen a fix.
   def awaiting_staff?
     AWAITING_STAFF.include?(status)
   end
 
-  # Which recheck results make sense from the current status.
   def allowed_recheck_results
     case status
     when "reported_fixed" then %w[verified not_verified]
@@ -47,9 +35,9 @@ class CareConcern < ApplicationRecord
     allowed_recheck_results.any?
   end
 
-  # Staff responses and family rechecks in the order they happened.
   def timeline
-    (staff_responses.select(&:persisted?) + rechecks.select(&:persisted?)).sort_by(&:created_at)
+    # Failed submissions leave unsaved entries in the associations.
+    (staff_responses + rechecks).select(&:persisted?).sort_by(&:created_at)
   end
 
   private

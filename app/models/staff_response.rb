@@ -1,5 +1,3 @@
-# What a staff member told the family about a concern. Saving one marks
-# the concern "Reported fixed", which still needs a relative's recheck.
 class StaffResponse < ApplicationRecord
   belongs_to :care_concern
 
