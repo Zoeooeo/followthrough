@@ -15,11 +15,11 @@ RSpec.describe Resident, type: :model do
 
   describe "#location" do
     it "joins the facility and room" do
-      expect(Resident.new(facility: "Maple Grove", room: "214").location).to eq("Maple Grove · Room 214")
+      expect(Resident.new(facility: "Greenview Nursing Home", room: "214").location).to eq("Greenview Nursing Home · Room 214")
     end
 
     it "leaves out missing parts" do
-      expect(Resident.new(facility: "Maple Grove").location).to eq("Maple Grove")
+      expect(Resident.new(facility: "Greenview Nursing Home").location).to eq("Greenview Nursing Home")
       expect(Resident.new(room: "214").location).to eq("Room 214")
       expect(Resident.new.location).to eq("")
     end
