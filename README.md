@@ -9,7 +9,7 @@ records whether it was **Verified**, **Not verified**, or **Recurred**.
 - **Heroku:** `https://YOUR-APP-NAME.herokuapp.com` (replace after deploying)
 - **GitHub:** `https://github.com/YOUR-ACCOUNT/followthrough`
 
-## Team
+## Team members
 
 | Name | UNI |
 |---|---|
