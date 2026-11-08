@@ -29,13 +29,13 @@ RSpec.describe "Residents", type: :request do
   describe "POST /residents" do
     it "creates a profile and goes to it" do
       expect {
-        post residents_path, params: { resident: { name: "Linda Chen", facility: "Maple Grove", room: "214" } }
+        post residents_path, params: { resident: { name: "Linda Chen", facility: "Greenview Nursing Home", room: "214" } }
       }.to change(Resident, :count).by(1)
 
       resident = Resident.last
       expect(response).to redirect_to(resident_path(resident))
       follow_redirect!
-      expect(response.body).to include("Profile created for Linda Chen.", "Maple Grove · Room 214")
+      expect(response.body).to include("Profile created for Linda Chen.", "Greenview Nursing Home · Room 214")
     end
 
     it "shows an error without a name" do
