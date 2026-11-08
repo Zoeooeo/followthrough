@@ -7,7 +7,9 @@
     <% @residents.each do |resident| %>
       <li id="<%= dom_id(resident) %>">
         <span><%= link_to resident.name, resident_path(resident) %></span>
-        <span class="muted"><%= resident.location %></span>
+        <% if resident.location.present? %>
+          <span class="muted">Lives at <%= resident.location %></span>
+        <% end %>
       </li>
     <% end %>
   </ul>
