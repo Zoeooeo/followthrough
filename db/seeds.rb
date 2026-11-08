@@ -2,7 +2,7 @@
 # Run with: bin/rails db:seed (safe to run more than once)
 
 linda = Resident.find_or_create_by!(name: "Linda Chen") do |r|
-  r.facility = "Maple Grove"
+  r.facility = "Greenview Nursing Home"
   r.room = "214"
 end
 
