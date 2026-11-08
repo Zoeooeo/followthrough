@@ -6,7 +6,7 @@ en:
     attributes:
       resident:
         name: "Name"
-        facility: "Facility"
+        facility: "Care facility"
         room: "Room"
       signal_item:
         need: "Need"
