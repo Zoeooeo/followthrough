@@ -2,7 +2,9 @@
 
 <p><%= link_to "Back to home", root_path %></p>
 <h1><%= @resident.name %></h1>
-<p class="muted"><%= @resident.location %></p>
+<% if @resident.location.present? %>
+  <p class="muted">Lives at <%= @resident.location %></p>
+<% end %>
 
 <section id="rechecks-due" class="panel">
   <h2 style="margin-top: 0">Rechecks due</h2>
