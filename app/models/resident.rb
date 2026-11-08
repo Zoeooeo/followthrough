@@ -13,6 +13,6 @@ class Resident < ApplicationRecord
   end
 
   def location
-    [facility.presence, room.present? ? "Room #{room}" : nil].compact.join(" · ")
+    [facility.presence, room.present? ? "Room #{room}" : nil].compact.join(", ")
   end
 end
