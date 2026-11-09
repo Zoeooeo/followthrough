@@ -25,24 +25,37 @@ FollowThrough helps families keep track of care concerns for someone in a nursin
 sequenceDiagram
     actor David as David (son)
     actor Staff as Nursing staff
-    participant App as FollowThrough
     actor Amy as Amy (daughter)
+    participant App as FollowThrough (Rails app)
+    participant DB as Database
 
-    David->>App: Open a concern and describe what fixed looks like
-    App-->>David: Status Open
+    Note over David,DB: Tuesday visit
+    David->>+App: POST care_concerns (problem, what fixed looks like)
+    App->>DB: Save concern, status open
+    App-->>-David: Concern page, status Open
     Staff->>David: Says the problem is fixed
-    David->>App: Record what staff said
-    App-->>David: Status Reported fixed, recheck due
-    Amy->>App: Open the concern on her next visit
-    App-->>Amy: Show the Signal Card checklist
+    David->>+App: POST staff_responses (who, what, when)
+    App->>DB: Save response, status reported_fixed
+    App-->>-David: Status Reported fixed, recheck due
+
+    opt David tries to recheck his own concern
+        David->>+App: POST rechecks (checked_by David)
+        App-->>-David: 422, must be a different relative
+    end
+
+    Note over David,DB: Sunday visit
+    Amy->>+App: GET care_concern page
+    App->>DB: Load concern and Signal Card checklist
+    App-->>-Amy: Recheck form with checklist
+    Amy->>+App: POST rechecks (checked_by Amy, result)
     alt The fix held
-        Amy->>App: Recheck as Verified
+        App->>DB: Save recheck, status verified
         App-->>Amy: Status Verified
     else The fix did not hold
-        Amy->>App: Recheck as Not verified
-        App-->>Amy: Status Not verified, waiting for staff again
+        App->>DB: Save recheck, status not_verified
+        App-->>Amy: Status Not verified, staff form shown again
     end
-    Note over David,Amy: The relative who opened the concern cannot recheck it
+    deactivate App
 ```
 
 Each step is covered by a Cucumber feature: opening a concern (`3_open_concern.feature`), recording staff responses (`4_staff_response.feature`), and rechecks (`5_recheck.feature`).
