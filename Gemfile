@@ -1,5 +1,5 @@
 source "https://rubygems.org"
-
+ruby "3.3.8"
 gem "rails", "~> 7.2.2"
 gem "puma", ">= 5.0"
 gem "bootsnap", require: false
