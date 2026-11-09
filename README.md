@@ -135,3 +135,7 @@ features/            Cucumber user stories and step definitions
 spec/models/         Validation and status-rule tests
 spec/requests/       HTTP request tests
 ```
+
+## References
+
+- Kevin Hakanson. "Sequence Diagrams enrich your understanding of distributed architectures." *AWS Architecture Blog*, August 19, 2022. https://aws.amazon.com/blogs/architecture/sequence-diagrams-enrich-your-understanding-of-distributed-architectures/
