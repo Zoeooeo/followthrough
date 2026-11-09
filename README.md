@@ -60,6 +60,19 @@ sequenceDiagram
 
 Each step is covered by a Cucumber feature: opening a concern (`3_open_concern.feature`), recording staff responses (`4_staff_response.feature`), and rechecks (`5_recheck.feature`).
 
+### UI sketches
+
+Zoe Li drew our UI sketches by hand. They are in [docs/ui-sketches.pdf](docs/ui-sketches.pdf). Iteration 1 implements the core workflow from these sketches. The other screens are planned for iteration 2.
+
+| Sketch | Iteration 1 |
+| --- | --- |
+| Signal Card | Implemented |
+| Concern detail and recheck | Implemented |
+| Family home (rechecks due, open concerns) | Partly implemented on the resident page |
+| Family space (members, roles, invites) | Planned for iteration 2 |
+| Log a visit | Planned for iteration 2 |
+| Care plan meeting brief | Planned for iteration 2 |
+
 ### Concern status
 
 ```
