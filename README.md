@@ -19,6 +19,34 @@ FollowThrough helps families keep track of care concerns for someone in a nursin
 - [Staff responses](features/4_staff_response.feature). Record who spoke to the family, what they said, and when.
 - [Rechecks](features/5_recheck.feature). Use the linked Signal Card checklist, if there is one, and record what you found.
 
+### How the core workflow fits together
+
+```mermaid
+sequenceDiagram
+    actor David as David (son)
+    actor Staff as Nursing staff
+    participant App as FollowThrough
+    actor Amy as Amy (daughter)
+
+    David->>App: Open a concern and describe what fixed looks like
+    App-->>David: Status Open
+    Staff->>David: Says the problem is fixed
+    David->>App: Record what staff said
+    App-->>David: Status Reported fixed, recheck due
+    Amy->>App: Open the concern on her next visit
+    App-->>Amy: Show the Signal Card checklist
+    alt The fix held
+        Amy->>App: Recheck as Verified
+        App-->>Amy: Status Verified
+    else The fix did not hold
+        Amy->>App: Recheck as Not verified
+        App-->>Amy: Status Not verified, waiting for staff again
+    end
+    Note over David,Amy: The relative who opened the concern cannot recheck it
+```
+
+Each step is covered by a Cucumber feature: opening a concern (`3_open_concern.feature`), recording staff responses (`4_staff_response.feature`), and rechecks (`5_recheck.feature`).
+
 ### Concern status
 
 ```
