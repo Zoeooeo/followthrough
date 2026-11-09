@@ -2,6 +2,8 @@
 
 FollowThrough helps families keep track of care concerns for someone in a nursing home or assisted living facility. When staff say they've fixed a problem, the family records what they said and marks the concern **Reported fixed**. On the next visit, a different relative checks the fix and records what they saw. The concern becomes **Verified** only when a relative confirms the fix.
 
+**Live app:** https://followthrough-team-d64d6d9bc835.herokuapp.com/
+
 ## Team members
 
 | Name | UNI |
