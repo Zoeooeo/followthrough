@@ -1,0 +1,76 @@
+<% content_for :title, "Meeting brief" %>
+
+<p class="no-print"><%= link_to "Back to #{@resident.name}", resident_path(@resident) %></p>
+<p class="muted" style="margin-bottom: 0">FollowThrough · Care plan meeting brief</p>
+<h1><%= @resident.name %></h1>
+<% if @resident.location.present? %>
+  <p class="muted">Lives at <%= @resident.location %></p>
+<% end %>
+
+<%= form_with url: resident_brief_path(@resident), method: :get, class: "no-print inline-fields" do |form| %>
+  <div class="field">
+    <%= form.label :from, "From" %>
+    <%= form.date_field :from, value: @brief.from %>
+  </div>
+  <div class="field">
+    <%= form.label :to, "To" %>
+    <%= form.date_field :to, value: @brief.to %>
+  </div>
+  <%= form.submit "Update", name: nil %>
+<% end %>
+
+<p id="brief-period"><strong>Period:</strong> <%= short_date(@brief.from) %> to <%= short_date(@brief.to) %></p>
+
+<div class="tiles">
+  <div class="tile staff" id="staff-reported-count">
+    <span class="tile-label">Staff reported fixed</span>
+    <span class="tile-number"><%= @brief.staff_reported_fixed_count %></span>
+  </div>
+  <div class="tile family" id="family-verified-count">
+    <span class="tile-label">Family verified</span>
+    <span class="tile-number"><%= @brief.family_verified_count %></span>
+  </div>
+  <div class="tile gap" id="not-seen-fixed-count">
+    <span class="tile-label">Not seen fixed</span>
+    <span class="tile-number"><%= @brief.not_seen_fixed_count %></span>
+    <% if @brief.gap_breakdown.any? %>
+      <span id="gap-breakdown"><%= @brief.gap_breakdown.map { |label, count| "#{count} #{label.downcase}" }.join(", ") %></span>
+    <% end %>
+  </div>
+</div>
+
+<h2>Staff said vs. family saw</h2>
+<% if @brief.rows.any? %>
+  <table>
+    <thead>
+      <tr><th>Concern</th><th>Staff said</th><th>Family saw</th><th>Outcome</th></tr>
+    </thead>
+    <tbody>
+      <% @brief.rows.each do |row| %>
+        <tr id="<%= dom_id(row.concern, :brief) %>">
+          <td><%= row.concern.title %></td>
+          <td>
+            <% row.staff_responses.each do |response| %>
+              <div><%= short_date(response.said_on) %> · <%= response.staff_name %>: "<%= response.statement %>"</div>
+            <% end %>
+            <% if row.staff_responses.empty? %><span class="muted">Nothing in this period</span><% end %>
+          </td>
+          <td>
+            <% row.rechecks.each do |recheck| %>
+              <div><%= short_date(recheck.created_at) %> · <%= recheck.checked_by.name %>: <%= recheck.result_label %><%= ". #{recheck.note}" if recheck.note.present? %></div>
+            <% end %>
+            <% if row.rechecks.empty? %><span class="muted">No recheck yet</span><% end %>
+          </td>
+          <td><strong><%= row.outcome_label %></strong></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>No staff responses or rechecks in this period.</p>
+<% end %>
+
+<p class="no-print" style="margin-top: 20px">
+  <button type="button" onclick="window.print()">Print or save as PDF</button>
+</p>
+<p class="muted">Family observations, not medical judgment. Prepared by <%= current_user.name %> on <%= short_date(Date.current) %>.</p>
