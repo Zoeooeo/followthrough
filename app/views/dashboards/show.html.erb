@@ -1,0 +1,69 @@
+<% content_for :title, "Home" %>
+
+<h1>Hi, <%= current_user.name %></h1>
+
+<section id="my-rechecks" class="panel">
+  <h2 style="margin-top: 0">Your rechecks</h2>
+  <% if @my_rechecks.any? %>
+    <p class="hint">Staff say these are fixed. You were asked to check them on your next visit.</p>
+    <ul class="list">
+      <% @my_rechecks.each do |concern| %>
+        <li id="<%= dom_id(concern, :my_recheck) %>">
+          <span>
+            <strong><%= concern.title %></strong><br>
+            <span class="muted"><%= concern.resident.name %> · opened by <%= concern.opened_by.name %></span>
+          </span>
+          <%= link_to "Start check", resident_care_concern_path(concern.resident, concern), class: "button" %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p>No rechecks assigned to you right now.</p>
+  <% end %>
+</section>
+
+<section id="open-concerns">
+  <h2>All open concerns</h2>
+  <% if @open_concerns.any? %>
+    <ul class="list">
+      <% @open_concerns.each do |concern| %>
+        <li id="<%= dom_id(concern) %>">
+          <span>
+            <%= link_to concern.title, resident_care_concern_path(concern.resident, concern) %><br>
+            <span class="muted">
+              <%= concern.resident.name %>
+              <% if concern.status_reported_fixed? && concern.assigned_to %>
+                · Recheck: <%= concern.assigned_to == current_user ? "You" : concern.assigned_to.name %>
+              <% end %>
+            </span>
+          </span>
+          <%= status_badge(concern) %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p>No open concerns.</p>
+  <% end %>
+</section>
+
+<section id="families">
+  <h2>Your family spaces</h2>
+  <% if @residents.any? %>
+    <ul class="list">
+      <% @residents.each do |resident| %>
+        <li id="<%= dom_id(resident) %>">
+          <span><%= link_to resident.name, resident_path(resident) %></span>
+          <% if resident.location.present? %>
+            <span class="muted">Lives at <%= resident.location %></span>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p>You're not in a family space yet. Add your loved one, or join your family with an invite code.</p>
+  <% end %>
+  <div class="actions">
+    <%= link_to "Add a loved one", new_resident_path, class: "button" %>
+    <%= link_to "Join with an invite code", join_path, class: "button secondary" %>
+  </div>
+</section>
