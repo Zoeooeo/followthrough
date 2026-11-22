@@ -3,6 +3,7 @@ ruby "3.3.8"
 gem "rails", "~> 7.2.2"
 gem "puma", ">= 5.0"
 gem "bootsnap", require: false
+gem "bcrypt", "~> 3.1.7"
 gem "tzinfo-data", platforms: %i[windows jruby]
 
 group :development, :test do
