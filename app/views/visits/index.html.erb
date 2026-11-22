@@ -1,0 +1,26 @@
+<% content_for :title, "Visits" %>
+
+<p><%= link_to "Back to #{@resident.name}", resident_path(@resident) %></p>
+<h1>Visits to <%= @resident.name %></h1>
+
+<% if @visits.any? %>
+  <table>
+    <thead>
+      <tr><th>Date</th><th>Visitor</th><th>Mood</th><th>Signals</th></tr>
+    </thead>
+    <tbody>
+      <% @visits.each do |visit| %>
+        <tr id="<%= dom_id(visit, :row) %>">
+          <td><%= link_to short_date(visit.visited_on), resident_visit_path(@resident, visit) %></td>
+          <td><%= visit.user.name %></td>
+          <td><%= visit.mood_label %></td>
+          <td><%= visit.signal_items.map(&:need).sort.join(", ").presence || "None" %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <p>No visits logged yet.</p>
+<% end %>
+
+<p><%= link_to "Log a visit", new_resident_visit_path(@resident), class: "button" %></p>

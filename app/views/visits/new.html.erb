@@ -1,0 +1,52 @@
+<% content_for :title, "Log a visit" %>
+
+<p><%= link_to "Back to #{@resident.name}", resident_path(@resident) %></p>
+<h1>Log a visit</h1>
+<p class="muted"><%= @resident.name %> · visited by <%= current_user.name %></p>
+
+<% if @my_rechecks.any? %>
+  <section id="visit-rechecks" class="panel">
+    <p style="margin-top: 0"><strong><%= pluralize(@my_rechecks.size, "recheck") %> for you on this visit</strong></p>
+    <ul>
+      <% @my_rechecks.each do |concern| %>
+        <li><%= link_to concern.title, resident_care_concern_path(@resident, concern) %></li>
+      <% end %>
+    </ul>
+  </section>
+<% end %>
+
+<%= render "shared/errors", record: @visit %>
+
+<%= form_with model: [@resident, @visit] do |form| %>
+  <div class="field">
+    <%= form.label :visited_on %>
+    <%= form.date_field :visited_on, max: Date.current %>
+  </div>
+
+  <fieldset class="field">
+    <legend><strong>How was <%= @resident.name %> today?</strong></legend>
+    <% Visit::MOODS.each do |mood| %>
+      <div class="radio">
+        <%= form.radio_button :mood, mood %>
+        <%= form.label "mood_#{mood}", mood.humanize %>
+      </div>
+    <% end %>
+  </fieldset>
+
+  <% signals = @resident.signal_items.order(:need) %>
+  <% if signals.any? %>
+    <fieldset class="field">
+      <legend><strong>Did you notice any signals from the Signal Card?</strong></legend>
+      <%= form.collection_check_boxes :signal_item_ids, signals, :id, :need do |box| %>
+        <div class="radio"><%= box.check_box %> <%= box.label %></div>
+      <% end %>
+    </fieldset>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :notes %>
+    <%= form.text_area :notes, placeholder: "e.g. Hands tucked under her arms. Window was open. Ate most of lunch." %>
+  </div>
+
+  <%= form.submit "Save visit" %>
+<% end %>

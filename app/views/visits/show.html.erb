@@ -1,0 +1,40 @@
+<% content_for :title, "Visit" %>
+
+<p><%= link_to "Back to #{@resident.name}", resident_path(@resident) %></p>
+<h1>Visit on <%= short_date(@visit.visited_on) %></h1>
+<p class="muted">Visited by <%= @visit.user.name %></p>
+
+<dl>
+  <dt>How <%= @resident.name %> was</dt>
+  <dd id="visit-mood"><%= @visit.mood_label %></dd>
+  <dt>Signals noticed</dt>
+  <dd id="visit-signals">
+    <% if @visit.signal_items.any? %>
+      <%= @visit.signal_items.map(&:need).sort.join(", ") %>
+    <% else %>
+      None
+    <% end %>
+  </dd>
+  <% if @visit.notes.present? %>
+    <dt>What they saw</dt>
+    <dd id="visit-notes" style="white-space: pre-line"><%= @visit.notes %></dd>
+  <% end %>
+</dl>
+
+<section id="visit-concerns">
+  <h2>Concerns from this visit</h2>
+  <% concerns = @visit.care_concerns.order(:created_at) %>
+  <% if concerns.any? %>
+    <ul class="list">
+      <% concerns.each do |concern| %>
+        <li id="<%= dom_id(concern, :visit) %>">
+          <%= link_to concern.title, resident_care_concern_path(@resident, concern) %>
+          <%= status_badge(concern) %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p>No concerns opened from this visit.</p>
+  <% end %>
+  <p><%= link_to "Open a concern from this visit", new_resident_care_concern_path(@resident, visit_id: @visit.id), class: "button" %></p>
+</section>
