@@ -8,6 +8,7 @@ class SignalItemsController < ApplicationController
 
   def create
     @signal_item = @resident.signal_items.build(signal_item_params)
+    @signal_item.updated_by = current_user
 
     if @signal_item.save
       redirect_to resident_path(@resident), notice: "Signal added to the Signal Card."
@@ -20,7 +21,10 @@ class SignalItemsController < ApplicationController
   end
 
   def update
-    if @signal_item.update(signal_item_params)
+    @signal_item.assign_attributes(signal_item_params)
+    @signal_item.updated_by = current_user
+
+    if @signal_item.save
       redirect_to resident_path(@resident), notice: "Signal updated."
     else
       render :edit, status: :unprocessable_entity

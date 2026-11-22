@@ -4,7 +4,9 @@ Feature: Keep a Signal Card
   I want to write down each signal and what to check for
 
   Background:
-    Given a resident "Linda Chen" exists
+    Given I am signed in as "Amy"
+    And a resident "Linda Chen" exists
+    And I am in the family of "Linda Chen"
 
   Scenario: The Signal Card says it is not medical advice
     When I go to the page for resident "Linda Chen"
@@ -20,6 +22,7 @@ Feature: Keep a Signal Card
     Then I should see "Signal added to the Signal Card."
     And I should see "Licks her lips, points at her mouth"
     And I should see "Cup within reach"
+    And I should see "Updated by Amy"
 
   Scenario: A signal needs all three parts
     Given I am on the page for resident "Linda Chen"
@@ -29,7 +32,7 @@ Feature: Keep a Signal Card
     Then I should see "Shows it by can't be blank"
     And I should see "Check for can't be blank"
 
-  Scenario: Edit a signal
+  Scenario: Edit a signal and record who changed it
     Given "Linda Chen" has a signal "Thirst"
     And I am on the page for resident "Linda Chen"
     When I follow "Edit" for the signal "Thirst"
@@ -37,6 +40,7 @@ Feature: Keep a Signal Card
     And I press "Save signal"
     Then I should see "Signal updated."
     And I should see "Asks for juice"
+    And I should see "Updated by Amy"
 
   Scenario: Remove a signal
     Given "Linda Chen" has a signal "Thirst"
@@ -44,5 +48,23 @@ Feature: Keep a Signal Card
     And I am on the page for resident "Linda Chen"
     When I press "Delete" for the signal "Thirst"
     Then I should see "Signal removed."
-    And I should see "Pain"
-    And I should not see "Thirst"
+    And I should see the signal "Pain"
+    And I should not see the signal "Thirst"
+
+  Scenario: Find a signal quickly during a visit
+    Given "Linda Chen" has a signal "Thirst"
+    And "Linda Chen" has a signal "Pain"
+    And I am on the page for resident "Linda Chen"
+    When I fill in "Find a signal" with "THIRST"
+    And I press "Search"
+    Then I should see the signal "Thirst"
+    And I should not see the signal "Pain"
+    When I follow "Show all signals"
+    Then I should see the signal "Pain"
+
+  Scenario: No signal matches the search
+    Given "Linda Chen" has a signal "Thirst"
+    And I am on the page for resident "Linda Chen"
+    When I fill in "Find a signal" with "knee"
+    And I press "Search"
+    Then I should see "No signals match \"knee\"."

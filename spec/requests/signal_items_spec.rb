@@ -1,10 +1,13 @@
 require "rails_helper"
 
 RSpec.describe "Signal Card", type: :request do
-  let(:resident) { create_resident }
+  let(:amy) { @amy }
+  let(:resident) { @resident }
   let(:valid_params) do
     { signal_item: { need: "Thirst", shows_by: "Licks her lips", check_for: "Cup within reach\nCup half full" } }
   end
+
+  before { @amy, @resident = sign_in_to_family(name: "Amy") }
 
   describe "GET new" do
     it "shows the form" do
@@ -15,11 +18,12 @@ RSpec.describe "Signal Card", type: :request do
   end
 
   describe "POST create" do
-    it "adds a signal and returns to the profile" do
+    it "adds a signal, records who added it, and returns to the profile" do
       expect {
         post resident_signal_items_path(resident), params: valid_params
       }.to change(resident.signal_items, :count).by(1)
 
+      expect(SignalItem.last.updated_by).to eq(amy)
       expect(response).to redirect_to(resident_path(resident))
       follow_redirect!
       expect(response.body).to include("Signal added to the Signal Card.", "Cup within reach", "Cup half full")
@@ -36,7 +40,7 @@ RSpec.describe "Signal Card", type: :request do
   end
 
   describe "editing" do
-    let!(:signal) { create_signal(resident) }
+    let!(:signal) { create_signal(resident, updated_by: user_named("David")) }
 
     it "shows the edit form" do
       get edit_resident_signal_item_path(resident, signal)
@@ -44,11 +48,12 @@ RSpec.describe "Signal Card", type: :request do
       expect(response.body).to include("Edit signal", "Licks her lips")
     end
 
-    it "updates a signal" do
+    it "updates a signal and records who changed it" do
       patch resident_signal_item_path(resident, signal), params: { signal_item: { shows_by: "Asks for juice" } }
 
       expect(response).to redirect_to(resident_path(resident))
       expect(signal.reload.shows_by).to eq("Asks for juice")
+      expect(signal.updated_by).to eq(amy)
     end
 
     it "rejects an empty update" do
@@ -71,12 +76,22 @@ RSpec.describe "Signal Card", type: :request do
     end
   end
 
-  it "does not let one profile change another profile's signal" do
+  it "does not let one family change another family's signal" do
     other_signal = create_signal(create_resident(name: "Robert Lee"))
 
     patch resident_signal_item_path(resident, other_signal), params: { signal_item: { need: "Changed" } }
 
     expect(response).to have_http_status(:not_found)
     expect(other_signal.reload.need).to eq("Thirst")
+  end
+
+  it "does not let someone outside the family add a signal" do
+    other = create_resident(name: "Robert Lee")
+
+    expect {
+      post resident_signal_items_path(other), params: valid_params
+    }.not_to change(SignalItem, :count)
+
+    expect(response).to have_http_status(:not_found)
   end
 end

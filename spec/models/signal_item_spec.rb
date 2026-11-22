@@ -34,6 +34,34 @@ RSpec.describe SignalItem, type: :model do
     end
   end
 
+  describe ".matching" do
+    let!(:thirst) { create_signal(resident, need: "Thirst", shows_by: "Licks her lips", check_for: "Cup within reach") }
+    let!(:pain) { create_signal(resident, need: "Pain", shows_by: "Rubs her left knee", check_for: "Pillow under knee") }
+
+    it "returns every signal for a blank search" do
+      expect(resident.signal_items.matching("  ")).to contain_exactly(thirst, pain)
+    end
+
+    it "matches the need, ignoring case" do
+      expect(resident.signal_items.matching("THIRST")).to eq([thirst])
+    end
+
+    it "matches how the signal shows and what to check" do
+      expect(resident.signal_items.matching("knee")).to eq([pain])
+      expect(resident.signal_items.matching("cup")).to eq([thirst])
+    end
+
+    it "treats % and _ as plain characters" do
+      expect(resident.signal_items.matching("%")).to be_empty
+    end
+  end
+
+  it "remembers who last updated it" do
+    amy = user_named("Amy")
+    signal = create_signal(resident, updated_by: amy)
+    expect(signal.updated_by).to eq(amy)
+  end
+
   describe "deleting a signal" do
     it "keeps concerns that referred to it" do
       signal = create_signal(resident)
