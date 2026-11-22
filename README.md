@@ -13,13 +13,30 @@ FollowThrough helps families keep track of care concerns for someone in a nursin
 | Tianming Hao | th3016 |
 | Jessica Song | ys3815 |
 
-## Iteration 1
+## Try it
 
-- [Family profile](features/1_family_profile.feature). Add a resident, browse all profiles, and see each resident's Signal Card and concerns.
-- [Signal Card](features/2_signal_card.feature). Add, edit, or remove notes on how the resident shows a need and what to check.
-- [Concerns](features/3_open_concern.feature). Record a problem, describe what "fixed" would look like, and link it to a signal if there is one.
-- [Staff responses](features/4_staff_response.feature). Record who spoke to the family, what they said, and when.
-- [Rechecks](features/5_recheck.feature). Use the linked Signal Card checklist, if there is one, and record what you found.
+Sign in with one of the demo accounts. All three are in Linda Chen's family. The password for each is `password123`.
+
+| Account | Role | What to try |
+| --- | --- | --- |
+| amy@example.com | Relative | The home page shows a recheck assigned to Amy. Open it, check it against the Signal Card, and record the result. |
+| david@example.com | Organizer | The Family page shows the invite code and lets David remove relatives. David opened the water cup concern, so he can't recheck it. |
+| grace@example.com | Relative | Open the Meeting brief to compare what staff reported with what the family saw. |
+
+## Features
+
+Iteration 1 built the core workflow. Iteration 2 adds accounts, the shared family space, recheck assignments, visit logs, and the meeting brief.
+
+| Feature | What a user can do | User stories |
+| --- | --- | --- |
+| Accounts | Sign up, sign in and out. Every page needs an account. | [6_accounts](features/6_accounts.feature) |
+| Family space | Create a profile and become its organizer. Invite relatives with a code. Only members can see the profile. | [1_family_profile](features/1_family_profile.feature), [7_family_space](features/7_family_space.feature) |
+| Signal Card | Add, edit, remove and search signals. Each one shows who last updated it. | [2_signal_card](features/2_signal_card.feature) |
+| Visit log | Record how the resident seemed, which signals you noticed, and notes. Open a concern from a visit. | [10_visit_log](features/10_visit_log.feature) |
+| Concerns | Record a problem and what "fixed" would look like. A progress bar shows where it stands. | [3_open_concern](features/3_open_concern.feature) |
+| Staff responses | Record what staff said. The concern becomes Reported fixed and the recheck is assigned to another relative. | [4_staff_response](features/4_staff_response.feature), [8_recheck_assignment](features/8_recheck_assignment.feature) |
+| Rechecks | The assigned relative sees the recheck first on their home page and checks it with the Signal Card checklist. | [5_recheck](features/5_recheck.feature), [8_recheck_assignment](features/8_recheck_assignment.feature) |
+| Meeting brief | Pick a period and see how many fixes staff reported, how many the family verified, and each concern side by side. Print it or save it as a PDF. | [9_meeting_brief](features/9_meeting_brief.feature) |
 
 ### How the core workflow fits together
 
@@ -33,23 +50,25 @@ sequenceDiagram
 
     Note over David,DB: Tuesday visit
     David->>+App: POST care_concerns (problem, what fixed looks like)
-    App->>DB: Save concern, status open
+    App->>DB: Save concern, opened by David, status open
     App-->>-David: Concern page, status Open
     Staff->>David: Says the problem is fixed
-    David->>+App: POST staff_responses (who, what, when)
-    App->>DB: Save response, status reported_fixed
-    App-->>-David: Status Reported fixed, recheck due
+    David->>+App: POST staff_responses (who, what, when, recheck by Amy)
+    App->>DB: Save response, status reported_fixed, assigned to Amy
+    App-->>-David: Status Reported fixed, recheck assigned to Amy
 
     opt David tries to recheck his own concern
-        David->>+App: POST rechecks (checked_by David)
+        David->>+App: POST rechecks (signed in as David)
         App-->>-David: 422, must be a different relative
     end
 
     Note over David,DB: Sunday visit
+    Amy->>+App: GET home page
+    App->>DB: Load rechecks assigned to Amy
+    App-->>-Amy: Your rechecks, Water cup out of reach
     Amy->>+App: GET care_concern page
-    App->>DB: Load concern and Signal Card checklist
-    App-->>-Amy: Recheck form with checklist
-    Amy->>+App: POST rechecks (checked_by Amy, result)
+    App-->>-Amy: Recheck form with the Signal Card checklist
+    Amy->>+App: POST rechecks (signed in as Amy, result)
     alt The fix held
         App->>DB: Save recheck, status verified
         App-->>Amy: Status Verified
@@ -60,20 +79,22 @@ sequenceDiagram
     deactivate App
 ```
 
-Each step is covered by a Cucumber feature: opening a concern (`3_open_concern.feature`), recording staff responses (`4_staff_response.feature`), and rechecks (`5_recheck.feature`).
+Each step is covered by Cucumber: opening a concern (`3_open_concern.feature`), recording staff responses and assigning the recheck (`4_staff_response.feature`, `8_recheck_assignment.feature`), and rechecks (`5_recheck.feature`). The error case is the scenario "The relative who opened the concern cannot record its recheck" in `8_recheck_assignment.feature`.
 
 ### UI sketches
 
-Zoe Li drew our UI sketches by hand. They are in [docs/ui-sketches.pdf](docs/ui-sketches.pdf). Iteration 1 implements the core workflow from these sketches. The other screens are planned for iteration 2.
+Zoe Li drew our UI sketches by hand. They are in [docs/ui-sketches.pdf](docs/ui-sketches.pdf).
 
-| Sketch | Iteration 1 |
+| Sketch | Status |
 | --- | --- |
-| Signal Card | Implemented |
-| Concern detail and recheck | Implemented |
-| Family home (rechecks due, open concerns) | Partly implemented on the resident page |
-| Family space (members, roles, invites) | Planned for iteration 2 |
-| Log a visit | Planned for iteration 2 |
-| Care plan meeting brief | Planned for iteration 2 |
+| Signal Card | Implemented in iteration 1, search and "updated by" added in iteration 2 |
+| Concern detail and recheck | Implemented in iteration 1, progress bar and recheck assignment added in iteration 2 |
+| Family home (my rechecks first, open concerns) | Implemented in iteration 2 |
+| Family space (members, roles, invites) | Implemented in iteration 2 with invite codes |
+| Log a visit | Implemented in iteration 2 |
+| Care plan meeting brief | Implemented in iteration 2 |
+
+Photo uploads from the sketches are left out because Heroku does not keep uploaded files.
 
 ### Concern status
 
@@ -83,11 +104,9 @@ open ──staff response──> reported_fixed ──recheck──> verified �
                                └──recheck──> not_verified
 ```
 
-A new staff response moves a **Not verified** or **Recurred** concern back to **Reported fixed**. Once a fix is **Verified**, a recheck can only record that the problem came back. The relative who opened the concern can't record its recheck.
+A new staff response moves an **Open**, **Not verified** or **Recurred** concern to **Reported fixed**. Once a fix is **Verified**, a recheck can only record that the problem came back. The relative who opened a concern can't record its recheck, and the recheck can only be assigned to another member of the family.
 
-See the status rules and tests in [CareConcern](app/models/care_concern.rb), [StaffResponse](app/models/staff_response.rb), [Recheck](app/models/recheck.rb), and the [model specs](spec/models/).
-
-Iteration 2 plans include sign-in, family invitations with roles, recheck assignments for the next visitor, a dashboard, and a one-page meeting brief.
+See the rules in [CareConcern](app/models/care_concern.rb), [StaffResponse](app/models/staff_response.rb), [Recheck](app/models/recheck.rb) and [MeetingBrief](app/models/meeting_brief.rb), and the [model specs](spec/models/).
 
 ## Run locally
 
@@ -101,7 +120,7 @@ bin/setup                                     # install gems, prepare databases,
 bin/rails server
 ```
 
-Open [localhost:3000](http://localhost:3000) and select Linda Chen. The sample data has two signals and two concerns. Open **Water cup out of reach** to try a recheck.
+Open [localhost:3000](http://localhost:3000) and sign in with a demo account from [Try it](#try-it).
 
 ### Demo data
 
@@ -115,7 +134,7 @@ bundle exec cucumber
 bundle exec rspec
 ```
 
-Cucumber and Capybara run through the family workflows. RSpec covers models and HTTP requests. SimpleCov combines both runs in `coverage/index.html`.
+Cucumber and Capybara run through the family workflows. RSpec covers models and HTTP requests, including who can see and change each family's records. SimpleCov combines both runs in `coverage/index.html`.
 
 ## Deploy to Heroku
 
@@ -124,7 +143,7 @@ Heroku uses PostgreSQL. Before deploying, generate and commit `Gemfile.lock` wit
 ```bash
 bundle lock --add-platform x86_64-linux --add-platform ruby
 git add Gemfile.lock
-git commit -m "Add Gemfile.lock for Heroku"
+git commit -m "Update Gemfile.lock for Heroku"
 ```
 
 ```bash
@@ -132,23 +151,32 @@ heroku login
 heroku create
 heroku addons:create heroku-postgresql:essential-0
 git push heroku main
+heroku run bin/rails db:seed
 heroku open
 ```
 
-The release command in [Procfile](Procfile) runs the migrations. To load the demo data, run `heroku run bin/rails db:seed`. If Heroku asks for `SECRET_KEY_BASE`, run `heroku config:set SECRET_KEY_BASE="$(bin/rails secret)"`.
+The release command in [Procfile](Procfile) runs the migrations. If Heroku asks for `SECRET_KEY_BASE`, run `heroku config:set SECRET_KEY_BASE="$(bin/rails secret)"`.
 
-See the [Heroku Rails 7 guide](https://devcenter.heroku.com/articles/getting-started-with-rails7) for deployment setup.
+### Upgrading from iteration 1
+
+Iteration 2 replaces typed names with accounts, so concerns and rechecks from iteration 1 can't be carried over. Reset the database before deploying, then load the demo data again.
+
+```bash
+bin/rails db:reset                                              # local
+heroku pg:reset DATABASE_URL --confirm YOUR-APP-NAME            # Heroku, before git push heroku main
+```
 
 ## Project structure
 
 ```
-app/models/          Resident, SignalItem, CareConcern, StaffResponse, Recheck
-app/controllers/     Resource controllers. Child routes are nested under /residents/:resident_id.
+app/models/          User, Membership, Resident, SignalItem, Visit, CareConcern, StaffResponse, Recheck, MeetingBrief
+app/controllers/     Resource controllers. Family records are nested under /residents/:resident_id
+                     and only load for members of that family.
 app/views/           Server-rendered pages, no JavaScript required
 db/migrate/          Table definitions
 features/            Cucumber user stories and step definitions
-spec/models/         Validation and status-rule tests
-spec/requests/       HTTP request tests
+spec/models/         Validation, permission and status-rule tests
+spec/requests/       HTTP request tests, including sign-in and family access
 ```
 
 ## References
