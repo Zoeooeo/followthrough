@@ -1,11 +1,13 @@
+# A relative's check on a later visit. It must be someone in the family
+# other than the relative who opened the concern.
 class Recheck < ApplicationRecord
   RESULTS = %w[verified not_verified recurred].freeze
 
   belongs_to :care_concern
+  belongs_to :checked_by, class_name: "User"
 
-  validates :checked_by, presence: true
   validates :result, inclusion: { in: RESULTS, message: "must be Verified, Not verified, or Recurred" }
-  validate :result_fits_concern_status, :checked_by_a_different_relative, on: :create
+  validate :result_fits_concern_status, :checked_by_another_relative, on: :create
 
   after_create :update_concern_status
 
@@ -22,12 +24,14 @@ class Recheck < ApplicationRecord
     errors.add(:base, "#{result_label} can't be recorded while the concern is #{care_concern.status_label}")
   end
 
-  # A different relative rechecks so follow-up doesn't depend on one person returning.
-  def checked_by_a_different_relative
-    return if care_concern.nil? || checked_by.blank?
-    return unless checked_by.strip.casecmp?(care_concern.opened_by.to_s.strip)
+  def checked_by_another_relative
+    return if care_concern.nil? || checked_by.nil?
 
-    errors.add(:checked_by, "must be a different relative than #{care_concern.opened_by}, who opened this concern")
+    if checked_by == care_concern.opened_by
+      errors.add(:checked_by, "must be a different relative than #{care_concern.opened_by.name}, who opened this concern")
+    elsif !care_concern.resident.member?(checked_by)
+      errors.add(:checked_by, "must be in this resident's family")
+    end
   end
 
   def update_concern_status

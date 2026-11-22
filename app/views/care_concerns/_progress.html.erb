@@ -1,0 +1,5 @@
+<ol class="progress" id="concern-progress" aria-label="Progress">
+  <% CareConcern::PROGRESS_STEPS.each_with_index do |step, index| %>
+    <%= tag.li step, class: token_list(done: index < concern.progress_index, current: index == concern.progress_index) %>
+  <% end %>
+</ol>

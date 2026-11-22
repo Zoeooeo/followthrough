@@ -4,7 +4,10 @@ Feature: Record what staff said
   I want to record what staff said and see the concern marked "Reported fixed", not resolved
 
   Background:
-    Given a resident "Linda Chen" exists
+    Given I am signed in as "David"
+    And a resident "Linda Chen" exists
+    And I am in the family of "Linda Chen"
+    And "Amy" is in the family of "Linda Chen"
     And "Linda Chen" has a concern "Water cup out of reach" opened by "David"
 
   Scenario: Staff say the problem is fixed
@@ -14,9 +17,10 @@ Feature: Record what staff said
     And I fill in "Date" with "2026-10-14"
     And I press "Save staff response"
     Then the status should be "Reported fixed"
+    And the progress should be at "Reported fixed"
     And I should see "Staff said"
+    And I should see "recorded by David"
     And I should see "We moved the bed table to her right side"
-    And I should see the recheck form
 
   Scenario: A reported fix shows up as a recheck due
     Given staff reported "Water cup out of reach" as fixed

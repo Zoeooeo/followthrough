@@ -12,7 +12,7 @@
       <% @care_concerns.each do |concern| %>
         <tr id="<%= dom_id(concern, :row) %>">
           <td><%= link_to concern.title, resident_care_concern_path(@resident, concern) %></td>
-          <td><%= concern.opened_by %></td>
+          <td><%= concern.opened_by.name %></td>
           <td><%= status_badge(concern) %></td>
         </tr>
       <% end %>

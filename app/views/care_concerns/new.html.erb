@@ -7,6 +7,11 @@
 <%= render "shared/errors", record: @care_concern %>
 
 <%= form_with model: [@resident, @care_concern] do |form| %>
+  <% if @care_concern.visit %>
+    <%= form.hidden_field :visit_id %>
+    <p class="hint">From your visit on <%= short_date(@care_concern.visit.visited_on) %>.</p>
+  <% end %>
+
   <div class="field">
     <%= form.label :title %>
     <%= form.text_field :title, placeholder: "e.g. Water cup out of reach" %>
@@ -15,11 +20,6 @@
   <div class="field">
     <%= form.label :fixed_goal %>
     <%= form.text_area :fixed_goal, placeholder: "e.g. Cup on her right side, at least half full, at every visit" %>
-  </div>
-
-  <div class="field">
-    <%= form.label :opened_by %>
-    <%= form.text_field :opened_by, placeholder: "Your name" %>
   </div>
 
   <div class="field">

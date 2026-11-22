@@ -1,19 +1,24 @@
 require "rails_helper"
 
 RSpec.describe Recheck, type: :model do
-  let(:concern) { create_concern(create_resident, opened_by: "David") }
+  let(:resident) { create_resident }
+  let(:david) { user_named("David") }
+  let(:amy) { user_named("Amy") }
+  let(:concern) { create_concern(resident, opened_by: david) }
+
+  before { add_member(resident, amy) }
 
   def build_recheck(**attrs)
-    concern.rechecks.build({ checked_by: "Amy", result: "verified" }.merge(attrs))
+    concern.rechecks.build({ checked_by: amy, result: "verified" }.merge(attrs))
   end
 
   describe "validations" do
     before { report_fixed(concern) }
 
     it "requires who checked" do
-      recheck = build_recheck(checked_by: "")
+      recheck = build_recheck(checked_by: nil)
       expect(recheck).not_to be_valid
-      expect(recheck.errors.full_messages).to include("Checked by can't be blank")
+      expect(recheck.errors.full_messages).to include("Checked by must exist")
     end
 
     it "requires a known result" do
@@ -23,18 +28,30 @@ RSpec.describe Recheck, type: :model do
     end
   end
 
+  it "requires a concern" do
+    recheck = Recheck.new(checked_by: amy, result: "verified")
+    expect(recheck).not_to be_valid
+    expect(recheck.errors.full_messages).to eq(["Care concern must exist"])
+  end
+
   describe "who can recheck" do
     before { report_fixed(concern) }
 
-    it "accepts a different relative" do
-      expect(build_recheck(checked_by: "Amy")).to be_valid
+    it "accepts a different relative in the family" do
+      expect(build_recheck(checked_by: amy)).to be_valid
     end
 
-    it "rejects the relative who opened the concern, ignoring case and spaces" do
-      recheck = build_recheck(checked_by: "  david ")
+    it "rejects the relative who opened the concern" do
+      recheck = build_recheck(checked_by: david)
       expect(recheck).not_to be_valid
       expect(recheck.errors.full_messages)
         .to include("Checked by must be a different relative than David, who opened this concern")
+    end
+
+    it "rejects someone outside the family" do
+      recheck = build_recheck(checked_by: user_named("Grace"))
+      expect(recheck).not_to be_valid
+      expect(recheck.errors.full_messages).to include("Checked by must be in this resident's family")
     end
   end
 
@@ -63,17 +80,17 @@ RSpec.describe Recheck, type: :model do
   describe "after the family verified a fix" do
     before do
       report_fixed(concern)
-      record_recheck(concern, result: "verified", checked_by: "Amy")
+      record_recheck(concern, result: "verified", checked_by: amy)
     end
 
     it "reopens the concern as Recurred when the problem comes back" do
-      build_recheck(result: "recurred", checked_by: "Grace").save!
+      build_recheck(result: "recurred").save!
       expect(concern.reload).to be_status_recurred
       expect(concern.awaiting_staff?).to be(true)
     end
 
     it "does not allow verifying it again" do
-      expect(build_recheck(result: "verified", checked_by: "Grace").save).to be(false)
+      expect(build_recheck(result: "verified").save).to be(false)
     end
   end
 
