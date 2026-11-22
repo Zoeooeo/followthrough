@@ -1,7 +1,10 @@
 Feature: Create a shared profile for a loved one
   As an adult child of a nursing home resident
   So that my family can track her care in one place
-  I want to create one profile for my mother
+  I want to create one profile for my mother and be its organizer
+
+  Background:
+    Given I am signed in as "David"
 
   Scenario: Create a profile
     Given I am on the home page
@@ -13,6 +16,8 @@ Feature: Create a shared profile for a loved one
     Then I should see "Profile created for Linda Chen."
     And I should see "Lives at Greenview Nursing Home, Room 214"
     And I should see "Signal Card"
+    When I follow "Family members"
+    Then "David" should be listed as "Organizer" in the family
 
   Scenario: A profile needs a name
     Given I am on the home page
@@ -20,9 +25,14 @@ Feature: Create a shared profile for a loved one
     And I press "Create profile"
     Then I should see "Name can't be blank"
 
-  Scenario: See every loved one on the home page
+  Scenario: The home page lists only my own family spaces
     Given a resident "Linda Chen" exists
     And a resident "Robert Lee" exists
+    And I am in the family of "Linda Chen"
     When I go to the home page
     Then I should see "Linda Chen"
-    And I should see "Robert Lee"
+    And I should not see "Robert Lee"
+
+  Scenario: A new account has no family space yet
+    When I go to the home page
+    Then I should see "You're not in a family space yet."

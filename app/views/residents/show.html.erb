@@ -6,6 +6,13 @@
   <p class="muted">Lives at <%= @resident.location %></p>
 <% end %>
 
+<nav class="subnav" aria-label="<%= @resident.name %>">
+  <%= link_to "Log a visit", new_resident_visit_path(@resident) %>
+  <%= link_to "Meeting brief", resident_brief_path(@resident) %>
+  <%= link_to "Family members", resident_memberships_path(@resident) %>
+  <%= link_to "All concerns", resident_care_concerns_path(@resident) %>
+</nav>
+
 <section id="rechecks-due" class="panel">
   <h2 style="margin-top: 0">Rechecks due</h2>
   <% if @rechecks_due.any? %>
@@ -14,7 +21,14 @@
         <li id="<%= dom_id(concern, :recheck) %>">
           <span>
             <%= link_to concern.title, resident_care_concern_path(@resident, concern) %><br>
-            <span class="muted">Staff say it's fixed. Someone other than <%= concern.opened_by %> should check it.</span>
+            <span class="muted">
+              Staff say it's fixed.
+              <% if concern.assigned_to %>
+                Recheck assigned to <%= concern.assigned_to == current_user ? "you" : concern.assigned_to.name %>.
+              <% else %>
+                Anyone except <%= concern.opened_by.name %> can check it.
+              <% end %>
+            </span>
           </span>
           <%= status_badge(concern) %>
         </li>
@@ -41,13 +55,43 @@
   <% end %>
   <div class="actions">
     <%= link_to "Open a concern", new_resident_care_concern_path(@resident), class: "button" %>
-    <%= link_to "All concerns", resident_care_concerns_path(@resident) %>
   </div>
+</section>
+
+<section id="recent-visits">
+  <h2>Recent visits</h2>
+  <% if @recent_visits.any? %>
+    <ul class="list">
+      <% @recent_visits.each do |visit| %>
+        <li id="<%= dom_id(visit) %>">
+          <span>
+            <%= link_to short_date(visit.visited_on), resident_visit_path(@resident, visit) %>
+            <span class="muted">· <%= visit.user.name %></span>
+          </span>
+          <span><%= visit.mood_label %></span>
+        </li>
+      <% end %>
+    </ul>
+    <p><%= link_to "All visits", resident_visits_path(@resident) %></p>
+  <% else %>
+    <p>No visits logged yet.</p>
+  <% end %>
 </section>
 
 <section id="signal-card">
   <h2>Signal Card</h2>
   <p class="disclaimer">Family observations, not medical judgment. Ask staff or her doctor about anything medical.</p>
+
+  <%= form_with url: resident_path(@resident), method: :get, class: "search" do |form| %>
+    <div class="field">
+      <%= form.label :q, "Find a signal" %>
+      <%= form.text_field :q, value: @query, placeholder: "e.g. thirst, knee, calling out" %>
+    </div>
+    <%= form.submit "Search", name: nil %>
+  <% end %>
+  <% if @query.present? %>
+    <p class="hint">Showing signals that match "<%= @query %>". <%= link_to "Show all signals", resident_path(@resident) %></p>
+  <% end %>
 
   <% if @signal_items.any? %>
     <% @signal_items.each do |signal| %>
@@ -61,12 +105,17 @@
             <li><%= item %></li>
           <% end %>
         </ul>
+        <% if signal.updated_by %>
+          <p class="hint">Updated by <%= signal.updated_by.name %> on <%= short_date(signal.updated_at) %></p>
+        <% end %>
         <div class="actions">
           <%= link_to "Edit", edit_resident_signal_item_path(@resident, signal) %>
           <%= button_to "Delete", resident_signal_item_path(@resident, signal), method: :delete, class: "secondary" %>
         </div>
       </div>
     <% end %>
+  <% elsif @query.present? %>
+    <p>No signals match "<%= @query %>".</p>
   <% else %>
     <p>No signals yet. Add how she shows thirst, pain or distress.</p>
   <% end %>

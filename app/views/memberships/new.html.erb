@@ -1,0 +1,14 @@
+<% content_for :title, "Join a family" %>
+
+<p><%= link_to "Back to home", root_path %></p>
+<h1>Join a family space</h1>
+<p class="muted">Ask the organizer for the invite code on their Family page.</p>
+
+<%= form_with url: join_path do |form| %>
+  <div class="field">
+    <%= form.label :invite_code, "Invite code" %>
+    <%= form.text_field :invite_code, value: params[:invite_code], autocomplete: "off" %>
+  </div>
+
+  <%= form.submit "Join family" %>
+<% end %>
