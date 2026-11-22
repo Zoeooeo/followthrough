@@ -1,0 +1,20 @@
+<% content_for :title, "Sign in" %>
+
+<h1>Sign in</h1>
+<p class="muted">FollowThrough keeps one private space for your family, so everyone sees the same concerns and rechecks.</p>
+
+<%= form_with url: sign_in_path do |form| %>
+  <div class="field">
+    <%= form.label :email, "Email" %>
+    <%= form.email_field :email, value: params[:email], autocomplete: "email" %>
+  </div>
+
+  <div class="field">
+    <%= form.label :password, "Password" %>
+    <%= form.password_field :password, autocomplete: "current-password" %>
+  </div>
+
+  <%= form.submit "Sign in" %>
+<% end %>
+
+<p>New here? <%= link_to "Create an account", sign_up_path %></p>

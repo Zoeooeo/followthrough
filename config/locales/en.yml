@@ -4,6 +4,14 @@ en:
       care_concern: "Concern"
       signal_item: "Signal"
     attributes:
+      user:
+        name: "Name"
+        email: "Email"
+        password: "Password"
+        password_confirmation: "Confirm password"
+      membership:
+        user_id: "Relative"
+        role: "Role"
       resident:
         name: "Name"
         facility: "Care facility"
@@ -16,14 +24,24 @@ en:
         title: "Problem"
         fixed_goal: "What fixed looks like"
         opened_by: "Opened by"
+        assigned_to: "Recheck assignee"
         signal_item: "Related signal"
         signal_item_id: "Related signal"
+        visit: "Visit"
         status: "Status"
       staff_response:
         staff_name: "Staff member"
         statement: "What they said"
         said_on: "Date"
+        recheck_assignee_id: "Who should recheck"
+        recorded_by: "Recorded by"
       recheck:
         checked_by: "Checked by"
         result: "Result"
         note: "Note"
+      visit:
+        visited_on: "Visit date"
+        mood: "Mood"
+        notes: "What did you see?"
+        signal_items: "Signals"
+        user: "Visitor"

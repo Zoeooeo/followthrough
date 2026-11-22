@@ -1,8 +1,20 @@
 Rails.application.routes.draw do
-  root "residents#index"
+  root "dashboards#show"
 
-  resources :residents, only: %i[index show new create] do
+  get "sign_up", to: "users#new"
+  post "sign_up", to: "users#create"
+  get "sign_in", to: "sessions#new"
+  post "sign_in", to: "sessions#create"
+  delete "sign_out", to: "sessions#destroy"
+
+  get "join", to: "memberships#new"
+  post "join", to: "memberships#create"
+
+  resources :residents, only: %i[show new create] do
+    resources :memberships, only: %i[index destroy]
     resources :signal_items, only: %i[new create edit update destroy]
+    resources :visits, only: %i[index show new create]
+    resource :brief, only: :show
 
     resources :care_concerns, only: %i[index show new create] do
       resources :staff_responses, only: :create

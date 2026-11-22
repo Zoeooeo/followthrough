@@ -1,4 +1,3 @@
-# Coverage must start before the app is loaded. Settings live in .simplecov.
 require "simplecov"
 
 require "spec_helper"
@@ -21,4 +20,6 @@ RSpec.configure do |config|
   config.filter_rails_from_backtrace!
 
   config.include TestData
+  config.include AuthHelpers, type: :request
+  config.include ActiveSupport::Testing::TimeHelpers
 end

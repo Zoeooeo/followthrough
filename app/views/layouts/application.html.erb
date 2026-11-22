@@ -62,7 +62,36 @@
       ol.timeline li.family::before { background: var(--ink); }
       ol.timeline .who { font-size: 15px; color: var(--muted); }
       table { width: 100%; border-collapse: collapse; background: #fff; }
-      th, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--line); }
+      th, td { text-align: left; padding: 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+      input[type=email], input[type=password] {
+        width: 100%; font: inherit; padding: 10px 12px; border: 1.5px solid var(--ink); border-radius: 6px; background: #fff; }
+      header.site nav.account { margin-left: auto; display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: 16px; }
+      header.site nav.account button { min-height: 36px; padding: 4px 12px; font-size: 16px; background: #fff; color: var(--blue); }
+      .badge-role-organizer { border-color: var(--blue); color: #fff; background: var(--blue); }
+      .badge-role-relative { border-color: var(--blue); color: var(--blue); background: #fff; }
+      .subnav { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 8px 0 4px; }
+      .invite-code { font-size: 26px; font-weight: 700; letter-spacing: 3px; font-family: ui-monospace, Menlo, monospace; }
+      ol.progress { list-style: none; display: flex; gap: 6px; padding: 0; margin: 12px 0; }
+      ol.progress li { flex: 1; text-align: center; font-size: 15px; padding: 6px 4px; border: 2px solid var(--line); border-radius: 6px; color: var(--muted); background: #fff; }
+      ol.progress li.done { border-color: var(--ink); color: var(--ink); }
+      ol.progress li.current { border-color: var(--blue); background: var(--blue); color: #fff; font-weight: 600; }
+      .search { display: flex; gap: 8px; align-items: flex-end; }
+      .search .field { flex: 1; margin: 0; }
+      .tiles { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
+      .tile { flex: 1 1 180px; background: #fff; border: 2.5px solid var(--ink); border-radius: 8px; padding: 10px 14px; }
+      .tile .tile-label { display: block; font-size: 14px; letter-spacing: .5px; text-transform: uppercase; }
+      .tile .tile-number { display: block; font-size: 44px; font-weight: 700; line-height: 1.1; }
+      .tile.staff { border-style: dashed; border-color: var(--orange); color: var(--orange); }
+      .tile.family { border-color: var(--green); color: var(--green); }
+      .tile.gap { border-color: var(--red); color: var(--red); background: #fbe9e6; }
+      .inline-fields { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+      .inline-fields .field { margin: 0; }
+      @media print {
+        header.site, .no-print, .flash { display: none !important; }
+        body { background: #fff; font-size: 12pt; }
+        main { max-width: none; padding: 0; }
+        .tile .tile-number { font-size: 28pt; }
+      }
     </style>
   </head>
 
@@ -70,6 +99,15 @@
     <header class="site">
       <%= link_to "FollowThrough", root_path, class: "brand" %>
       <span class="tagline">Because "fixed" should mean verified</span>
+      <nav class="account" aria-label="Account">
+        <% if signed_in? %>
+          <span class="muted">Signed in as <%= current_user.name %></span>
+          <%= button_to "Sign out", sign_out_path, method: :delete %>
+        <% else %>
+          <%= link_to "Sign in", sign_in_path %>
+          <%= link_to "Sign up", sign_up_path %>
+        <% end %>
+      </nav>
     </header>
 
     <main>

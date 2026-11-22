@@ -1,9 +1,7 @@
-# Coverage must start before the app is loaded. Settings live in .simplecov.
 require "simplecov"
 
 require "cucumber/rails"
 
-# Show real errors in scenarios instead of Rails error pages.
 ActionController::Base.allow_rescue = false
 
 begin

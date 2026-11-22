@@ -1,0 +1,33 @@
+<% content_for :title, "Sign up" %>
+
+<h1>Create an account</h1>
+<p class="muted">Use the same email your relatives know you by. You can create a family space or join one with an invite code after signing up.</p>
+
+<%= render "shared/errors", record: @user %>
+
+<%= form_with model: @user, url: sign_up_path do |form| %>
+  <div class="field">
+    <%= form.label :name %>
+    <%= form.text_field :name, autocomplete: "name" %>
+  </div>
+
+  <div class="field">
+    <%= form.label :email %>
+    <%= form.email_field :email, autocomplete: "email" %>
+  </div>
+
+  <div class="field">
+    <%= form.label :password %>
+    <%= form.password_field :password, autocomplete: "new-password" %>
+    <p class="hint">At least 8 characters.</p>
+  </div>
+
+  <div class="field">
+    <%= form.label :password_confirmation %>
+    <%= form.password_field :password_confirmation, autocomplete: "new-password" %>
+  </div>
+
+  <%= form.submit "Create account" %>
+<% end %>
+
+<p>Already have an account? <%= link_to "Sign in here", sign_in_path %></p>
