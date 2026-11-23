@@ -30,7 +30,7 @@ Iteration 1 built the core workflow. Iteration 2 adds accounts, the shared famil
 | Feature | What a user can do | User stories |
 | --- | --- | --- |
 | Accounts | Sign up, sign in and out. Every page needs an account. | [6_accounts](features/6_accounts.feature) |
-| Family space | Create a profile and become its organizer. Invite relatives with a code. Only members can see the profile. | [1_family_profile](features/1_family_profile.feature), [7_family_space](features/7_family_space.feature) |
+| Family space | Create a profile and become its organizer. Invite relatives with a code. Only members can see the profile. The organizer can update the facility and room, and removing a relative opens their waiting rechecks to the rest of the family. | [1_family_profile](features/1_family_profile.feature), [7_family_space](features/7_family_space.feature) |
 | Signal Card | Add, edit, remove and search signals. Each one shows who last updated it. | [2_signal_card](features/2_signal_card.feature) |
 | Visit log | Record how the resident seemed, which signals you noticed, and notes. Open a concern from a visit. | [10_visit_log](features/10_visit_log.feature) |
 | Concerns | Record a problem and what "fixed" would look like. A progress bar shows where it stands. | [3_open_concern](features/3_open_concern.feature) |

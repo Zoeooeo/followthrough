@@ -32,8 +32,16 @@ class MembershipsController < ApplicationController
     elsif membership.organizer?
       redirect_to resident_memberships_path(@resident), alert: "The organizer can't be removed."
     else
+      had_rechecks = membership.waiting_rechecks.exists?
       membership.destroy
-      redirect_to resident_memberships_path(@resident), notice: "#{membership.user.name} was removed from the family."
+      redirect_to resident_memberships_path(@resident), notice: removed_message(membership.user.name, had_rechecks)
     end
+  end
+
+  private
+
+  def removed_message(name, had_rechecks)
+    message = "#{name} was removed from the family."
+    had_rechecks ? "#{message} Rechecks assigned to #{name} are now open to the rest of the family." : message
   end
 end

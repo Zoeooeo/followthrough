@@ -88,6 +88,19 @@ RSpec.describe "Family space", type: :request do
       expect(flash[:notice]).to eq("Amy was removed from the family.")
     end
 
+    it "opens the removed relative's waiting rechecks to the rest of the family" do
+      waiting = create_concern(resident, opened_by: david)
+      report_fixed(waiting, recheck_assignee: amy)
+      sign_in_as(david)
+
+      delete resident_membership_path(resident, amy_membership)
+
+      expect(waiting.reload.assigned_to).to be_nil
+      expect(flash[:notice]).to eq(
+        "Amy was removed from the family. Rechecks assigned to Amy are now open to the rest of the family."
+      )
+    end
+
     it "does not let the organizer be removed" do
       sign_in_as(david)
       organizer = resident.memberships.find_by(user: david)

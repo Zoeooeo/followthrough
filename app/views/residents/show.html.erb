@@ -11,6 +11,9 @@
   <%= link_to "Meeting brief", resident_brief_path(@resident) %>
   <%= link_to "Family members", resident_memberships_path(@resident) %>
   <%= link_to "All concerns", resident_care_concerns_path(@resident) %>
+  <% if @resident.organizer?(current_user) %>
+    <%= link_to "Edit profile", edit_resident_path(@resident) %>
+  <% end %>
 </nav>
 
 <section id="rechecks-due" class="panel">

@@ -34,6 +34,65 @@ RSpec.describe "Residents", type: :request do
     end
   end
 
+  describe "editing a profile" do
+    let(:david) { user_named("David") }
+    let(:resident) { create_resident }
+
+    before { add_member(resident, david, role: "organizer") }
+
+    it "shows the form and an Edit profile link to the organizer" do
+      sign_in_as(david)
+
+      get resident_path(resident)
+      expect(response.body).to include("Edit profile")
+
+      get edit_resident_path(resident)
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include("Save changes", "Greenview Nursing Home")
+    end
+
+    it "lets the organizer update the facility and room" do
+      sign_in_as(david)
+
+      patch resident_path(resident), params: { resident: { facility: "Greenview Nursing Home", room: "305" } }
+
+      expect(resident.reload.room).to eq("305")
+      expect(response).to redirect_to(resident_path(resident))
+      follow_redirect!
+      expect(response.body).to include("Profile updated.", "Lives at Greenview Nursing Home, Room 305")
+    end
+
+    it "shows an error and keeps the old name when the name is blank" do
+      sign_in_as(david)
+
+      patch resident_path(resident), params: { resident: { name: "" } }
+
+      expect(response).to have_http_status(422)
+      expect(response.body).to include("Name can&#39;t be blank", "Back to Linda Chen")
+      expect(resident.reload.name).to eq("Linda Chen")
+    end
+
+    it "does not let a relative edit the profile" do
+      amy = user_named("Amy")
+      add_member(resident, amy)
+      sign_in_as(amy)
+
+      get resident_path(resident)
+      expect(response.body).not_to include("Edit profile")
+
+      patch resident_path(resident), params: { resident: { room: "999" } }
+      expect(response).to redirect_to(resident_path(resident))
+      expect(flash[:alert]).to eq("Only the organizer can edit this profile.")
+      expect(resident.reload.room).to eq("214")
+    end
+
+    it "is hidden from people outside the family" do
+      sign_in_as(user_named("Grace"))
+      get edit_resident_path(resident)
+      expect(response).to have_http_status(:not_found)
+    end
+  end
+
   describe "viewing a profile" do
     it "shows the Signal Card, open concerns, rechecks due and recent visits" do
       amy, resident = sign_in_to_family(name: "Amy")

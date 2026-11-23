@@ -10,7 +10,7 @@ Rails.application.routes.draw do
   get "join", to: "memberships#new"
   post "join", to: "memberships#create"
 
-  resources :residents, only: %i[show new create] do
+  resources :residents, only: %i[show new create edit update] do
     resources :memberships, only: %i[index destroy]
     resources :signal_items, only: %i[new create edit update destroy]
     resources :visits, only: %i[index show new create]

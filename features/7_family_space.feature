@@ -57,3 +57,30 @@ Feature: Share a private family space
     And I am signed in as "Amy"
     When I go to the family page for "Linda Chen"
     Then I should not see a "Remove" button
+
+  Scenario: Removing a relative opens their waiting recheck to the family
+    Given "Amy" is in the family of "Linda Chen"
+    And "Linda Chen" has a concern "Water cup out of reach" opened by "David"
+    And staff reported "Water cup out of reach" as fixed and assigned the recheck to "Amy"
+    And I am signed in as "David"
+    And I am on the family page for "Linda Chen"
+    When I press "Remove" for the member "Amy"
+    Then I should see "Rechecks assigned to Amy are now open to the rest of the family."
+    When I go to the concern page for "Water cup out of reach"
+    Then I should see "Not assigned. Anyone except David can check it."
+
+  Scenario: The organizer updates the room after a move
+    Given I am signed in as "David"
+    And I am on the page for resident "Linda Chen"
+    When I follow "Edit profile"
+    And I fill in "Care facility" with "Greenview Nursing Home"
+    And I fill in "Room" with "305"
+    And I press "Save changes"
+    Then I should see "Profile updated."
+    And I should see "Lives at Greenview Nursing Home, Room 305"
+
+  Scenario: Relatives cannot edit the profile
+    Given "Amy" is in the family of "Linda Chen"
+    And I am signed in as "Amy"
+    When I go to the page for resident "Linda Chen"
+    Then I should not see "Edit profile"

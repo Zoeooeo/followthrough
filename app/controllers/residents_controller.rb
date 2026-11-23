@@ -1,6 +1,8 @@
 class ResidentsController < ApplicationController
+  before_action :set_own_resident, only: %i[show edit update]
+  before_action :require_organizer, only: %i[edit update]
+
   def show
-    @resident = current_user.residents.find(params[:id])
     @query = params[:q].to_s.strip
     @signal_items = @resident.signal_items.matching(@query).includes(:updated_by).order(:created_at)
     @open_concerns = @resident.unresolved_concerns
@@ -23,7 +25,29 @@ class ResidentsController < ApplicationController
     end
   end
 
+  def edit
+  end
+
+  # Residents often move rooms, so the organizer can keep the name, facility and room up to date.
+  def update
+    if @resident.update(resident_params)
+      redirect_to @resident, notice: "Profile updated."
+    else
+      render :edit, status: :unprocessable_entity
+    end
+  end
+
   private
+
+  def set_own_resident
+    @resident = current_user.residents.find(params[:id])
+  end
+
+  def require_organizer
+    return if @resident.organizer?(current_user)
+
+    redirect_to resident_path(@resident), alert: "Only the organizer can edit this profile."
+  end
 
   def resident_params
     params.require(:resident).permit(:name, :facility, :room)

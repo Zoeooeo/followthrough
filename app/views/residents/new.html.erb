@@ -3,24 +3,4 @@
 <p><%= link_to "Back to home", root_path %></p>
 <h1>Add a loved one</h1>
 
-<%= render "shared/errors", record: @resident %>
-
-<%= form_with model: @resident do |form| %>
-  <div class="field">
-    <%= form.label :name %>
-    <%= form.text_field :name %>
-  </div>
-
-  <div class="field">
-    <%= form.label :facility %>
-    <%= form.text_field :facility, placeholder: "e.g. Greenview Nursing Home" %>
-
-  </div>
-
-  <div class="field">
-    <%= form.label :room %>
-    <%= form.text_field :room %>
-  </div>
-
-  <%= form.submit "Create profile" %>
-<% end %>
+<%= render "form", resident: @resident, submit_label: "Create profile" %>

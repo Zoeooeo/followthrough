@@ -27,6 +27,27 @@ RSpec.describe Membership, type: :model do
     expect(duplicate.errors.full_messages).to include("Relative is already in this family")
   end
 
+  describe "removing a relative" do
+    let(:david) { user_named("David") }
+    let!(:membership) { add_member(resident, amy) }
+
+    it "clears only the rechecks still waiting on them in this family" do
+      waiting = create_concern(resident, opened_by: david)
+      report_fixed(waiting, recheck_assignee: amy)
+      done = create_concern(resident, title: "Glasses not cleaned", opened_by: david)
+      report_fixed(done, recheck_assignee: amy)
+      record_recheck(done, result: "verified", checked_by: amy)
+      elsewhere = create_concern(create_resident(name: "Robert Lee"), opened_by: david)
+      report_fixed(elsewhere, recheck_assignee: amy)
+
+      membership.destroy
+
+      expect(waiting.reload.assigned_to).to be_nil
+      expect(done.reload.assigned_to).to eq(amy)
+      expect(elsewhere.reload.assigned_to).to eq(amy)
+    end
+  end
+
   it "lets one relative belong to several families" do
     resident.memberships.create!(user: amy)
     expect(create_resident(name: "Robert Lee").memberships.build(user: amy)).to be_valid
