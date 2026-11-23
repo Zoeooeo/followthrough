@@ -28,9 +28,9 @@ class MembershipsController < ApplicationController
     membership = @resident.memberships.find(params[:id])
 
     if !@resident.organizer?(current_user)
-      redirect_to resident_memberships_path(@resident), alert: "Only the organizer can remove relatives."
+      redirect_to resident_memberships_path(@resident), alert: "Only the organizer can manage who has access."
     elsif membership.organizer?
-      redirect_to resident_memberships_path(@resident), alert: "The organizer can't be removed."
+      redirect_to resident_memberships_path(@resident), alert: "The organizer's access can't be removed."
     else
       had_rechecks = membership.waiting_rechecks.exists?
       membership.destroy
@@ -41,7 +41,7 @@ class MembershipsController < ApplicationController
   private
 
   def removed_message(name, had_rechecks)
-    message = "#{name} was removed from the family."
+    message = "#{name} no longer has access to #{@resident.name}'s family space."
     had_rechecks ? "#{message} Rechecks assigned to #{name} are now open to the rest of the family." : message
   end
 end

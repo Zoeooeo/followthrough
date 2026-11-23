@@ -1,7 +1,7 @@
 Feature: Share a private family space
   As the relative who set up my mother's profile
   So that my siblings can follow up on her care with me
-  I want to invite them with a code, while keeping everyone else out
+  I want to invite them with a code, keep everyone else out, and remove someone's access when they should no longer see it
 
   Background:
     Given a resident "Linda Chen" exists
@@ -45,26 +45,26 @@ Feature: Share a private family space
     Then I should see "We couldn't find that page."
     And I should not see "Signal Card"
 
-  Scenario: The organizer removes a relative
+  Scenario: The organizer removes a relative's access
     Given "Amy" is in the family of "Linda Chen"
     And I am signed in as "David"
     And I am on the family page for "Linda Chen"
-    When I press "Remove" for the member "Amy"
-    Then I should see "Amy was removed from the family."
+    When I press "Remove access" for the member "Amy"
+    Then I should see "Amy no longer has access to Linda Chen's family space."
 
-  Scenario: Relatives cannot remove anyone
+  Scenario: Relatives cannot remove anyone's access
     Given "Amy" is in the family of "Linda Chen"
     And I am signed in as "Amy"
     When I go to the family page for "Linda Chen"
-    Then I should not see a "Remove" button
+    Then I should not see a "Remove access" button
 
-  Scenario: Removing a relative opens their waiting recheck to the family
+  Scenario: Removing a relative's access opens their waiting recheck to the family
     Given "Amy" is in the family of "Linda Chen"
     And "Linda Chen" has a concern "Water cup out of reach" opened by "David"
     And staff reported "Water cup out of reach" as fixed and assigned the recheck to "Amy"
     And I am signed in as "David"
     And I am on the family page for "Linda Chen"
-    When I press "Remove" for the member "Amy"
+    When I press "Remove access" for the member "Amy"
     Then I should see "Rechecks assigned to Amy are now open to the rest of the family."
     When I go to the concern page for "Water cup out of reach"
     Then I should see "Not assigned. Anyone except David can check it."

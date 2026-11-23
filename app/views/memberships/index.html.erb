@@ -16,12 +16,18 @@
         <span class="actions" style="margin-top: 0">
           <%= role_badge(membership) %>
           <% if @organizer && membership.relative? %>
-            <%= button_to "Remove", resident_membership_path(@resident, membership), method: :delete, class: "secondary" %>
+            <%# The browser asks for confirmation before the request is sent. Cancel keeps the relative's access. %>
+            <% question = "Remove #{membership.user.name}'s access to #{@resident.name}'s family space? They can rejoin later with the invite code." %>
+            <%= button_to "Remove access", resident_membership_path(@resident, membership), method: :delete, class: "secondary",
+                          form: { onsubmit: "return confirm('#{j question}')" } %>
           <% end %>
         </span>
       </li>
     <% end %>
   </ul>
+  <% if @organizer %>
+    <p class="hint">Removing someone's access hides <%= @resident.name %>'s updates from them. They can rejoin later with the invite code.</p>
+  <% end %>
 </section>
 
 <section id="invite" class="panel">
@@ -32,6 +38,6 @@
 
 <section id="roles">
   <h2>What roles can do</h2>
-  <p><strong>Organizer:</strong> everything a relative can do, plus removing relatives from the family.</p>
-  <p><strong>Relative:</strong> logs visits, edits the Signal Card, opens concerns, records staff responses, and rechecks concerns opened by someone else.</p>
+  <p><strong>Organizer:</strong> everything a relative can do, plus editing the profile and managing who has access.</p>
+  <p><strong>Relative:</strong> logs visits, edits the Signal Card, opens concerns, records staff responses, and checks fixes on their visits for concerns opened by someone else.</p>
 </section>

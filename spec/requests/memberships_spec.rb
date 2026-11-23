@@ -15,7 +15,9 @@ RSpec.describe "Family space", type: :request do
       get resident_memberships_path(resident)
 
       expect(response).to have_http_status(:ok)
-      expect(response.body).to include("David (you)", "Amy", "Organizer", "Relative", resident.invite_code, "Remove")
+      expect(response.body).to include("David (you)", "Amy", "Organizer", "Relative", resident.invite_code, "Remove access",
+                                       "They can rejoin later with the invite code.",
+                                       "return confirm(&#39;Remove Amy\\&#39;s access to Linda Chen\\&#39;s family space?")
     end
 
     it "does not offer to remove anyone for a relative" do
@@ -24,7 +26,7 @@ RSpec.describe "Family space", type: :request do
 
       get resident_memberships_path(resident)
 
-      expect(response.body).not_to include(">Remove<")
+      expect(response.body).not_to include("Remove access")
     end
 
     it "is hidden from people outside the family" do
@@ -85,7 +87,7 @@ RSpec.describe "Family space", type: :request do
         delete resident_membership_path(resident, amy_membership)
       }.to change(Membership, :count).by(-1)
 
-      expect(flash[:notice]).to eq("Amy was removed from the family.")
+      expect(flash[:notice]).to eq("Amy no longer has access to Linda Chen's family space.")
     end
 
     it "opens the removed relative's waiting rechecks to the rest of the family" do
@@ -97,7 +99,8 @@ RSpec.describe "Family space", type: :request do
 
       expect(waiting.reload.assigned_to).to be_nil
       expect(flash[:notice]).to eq(
-        "Amy was removed from the family. Rechecks assigned to Amy are now open to the rest of the family."
+        "Amy no longer has access to Linda Chen's family space. " \
+        "Rechecks assigned to Amy are now open to the rest of the family."
       )
     end
 
@@ -109,7 +112,7 @@ RSpec.describe "Family space", type: :request do
         delete resident_membership_path(resident, organizer)
       }.not_to change(Membership, :count)
 
-      expect(flash[:alert]).to eq("The organizer can't be removed.")
+      expect(flash[:alert]).to eq("The organizer's access can't be removed.")
     end
 
     it "does not let a relative remove anyone" do
@@ -121,7 +124,7 @@ RSpec.describe "Family space", type: :request do
         delete resident_membership_path(resident, grace_membership)
       }.not_to change(Membership, :count)
 
-      expect(flash[:alert]).to eq("Only the organizer can remove relatives.")
+      expect(flash[:alert]).to eq("Only the organizer can manage who has access.")
     end
 
     it "takes away the removed relative's access" do
