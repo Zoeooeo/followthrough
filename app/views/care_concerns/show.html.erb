@@ -7,6 +7,7 @@
 
 <%= render "shared/errors", record: @staff_response %>
 <%= render "shared/errors", record: @recheck %>
+<%= render "shared/errors", record: @failed_assignment %>
 
 <dl>
   <dt>What fixed looks like</dt>
@@ -21,11 +22,28 @@
     <dt>Related signal</dt>
     <dd><%= @care_concern.signal_item.need %></dd>
   <% end %>
-  <% if @care_concern.status_reported_fixed? && @care_concern.assigned_to %>
+  <% if @care_concern.status_reported_fixed? %>
     <dt>Recheck</dt>
-    <dd id="recheck-assignee">Recheck assigned to <%= @care_concern.assigned_to.name %></dd>
+    <% if @care_concern.assigned_to %>
+      <dd id="recheck-assignee">Recheck assigned to <%= @care_concern.assigned_to.name %></dd>
+    <% else %>
+      <dd id="recheck-assignee">Not assigned. Anyone except <%= @care_concern.opened_by.name %> can check it.</dd>
+    <% end %>
   <% end %>
 </dl>
+
+<%# Plans change between visits, so any relative can hand the recheck to someone else while it is still waiting. %>
+<% if @care_concern.status_reported_fixed? && @assignee_options.any? %>
+  <section id="reassign-recheck" class="panel">
+    <%= form_with model: @care_concern, url: resident_care_concern_recheck_assignment_path(@resident, @care_concern), method: :patch do |form| %>
+      <div class="field">
+        <%= form.label :assigned_to_id, "Reassign the recheck to" %>
+        <%= form.collection_select :assigned_to_id, @assignee_options, :id, :name, include_blank: "Anyone in the family" %>
+      </div>
+      <%= form.submit "Reassign recheck" %>
+    <% end %>
+  </section>
+<% end %>
 
 <% if @care_concern.recheck_allowed? %>
   <% if @care_concern.opened_by == current_user %>

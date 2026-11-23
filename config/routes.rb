@@ -19,6 +19,7 @@ Rails.application.routes.draw do
     resources :care_concerns, only: %i[index show new create] do
       resources :staff_responses, only: :create
       resources :rechecks, only: :create
+      resource :recheck_assignment, only: :update
     end
   end
 

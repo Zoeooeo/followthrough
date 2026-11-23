@@ -55,3 +55,32 @@ Feature: Assign each recheck to another relative
     When I go to the concern page for "Hearing aid not put in"
     Then I should see "Grace is the only one in this family"
     And I should see "Invite another relative"
+
+  Scenario: The assigned relative hands the recheck to someone else
+    Given "Grace" is in the family of "Linda Chen"
+    And staff reported "Water cup out of reach" as fixed and assigned the recheck to "Amy"
+    And I am signed in as "Amy"
+    And I am on the concern page for "Water cup out of reach"
+    When I select "Grace" from "Reassign the recheck to"
+    And I press "Reassign recheck"
+    Then I should see "Recheck reassigned to Grace."
+    And I should see "Recheck assigned to Grace"
+    When I go to the home page
+    Then I should not see "Water cup out of reach" in my rechecks
+    When I press "Sign out"
+    And I am signed in as "Grace"
+    Then I should see "Water cup out of reach" in my rechecks
+
+  Scenario: A recheck can be opened up to anyone in the family
+    Given staff reported "Water cup out of reach" as fixed and assigned the recheck to "Amy"
+    And I am signed in as "Amy"
+    And I am on the concern page for "Water cup out of reach"
+    When I select "Anyone in the family" from "Reassign the recheck to"
+    And I press "Reassign recheck"
+    Then I should see "Recheck is no longer assigned. Anyone except David can check it."
+    And I should see "Not assigned. Anyone except David can check it."
+
+  Scenario: There is nothing to reassign before staff report a fix
+    Given I am signed in as "Amy"
+    When I go to the concern page for "Water cup out of reach"
+    Then I should not see a "Reassign recheck" button

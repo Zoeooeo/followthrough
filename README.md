@@ -35,7 +35,7 @@ Iteration 1 built the core workflow. Iteration 2 adds accounts, the shared famil
 | Visit log | Record how the resident seemed, which signals you noticed, and notes. Open a concern from a visit. | [10_visit_log](features/10_visit_log.feature) |
 | Concerns | Record a problem and what "fixed" would look like. A progress bar shows where it stands. | [3_open_concern](features/3_open_concern.feature) |
 | Staff responses | Record what staff said. The concern becomes Reported fixed and the recheck is assigned to another relative. | [4_staff_response](features/4_staff_response.feature), [8_recheck_assignment](features/8_recheck_assignment.feature) |
-| Rechecks | The assigned relative sees the recheck first on their home page and checks it with the Signal Card checklist. | [5_recheck](features/5_recheck.feature), [8_recheck_assignment](features/8_recheck_assignment.feature) |
+| Rechecks | The assigned relative sees the recheck first on their home page and checks it with the Signal Card checklist. If plans change, any relative can reassign the recheck to someone else or open it to anyone in the family. | [5_recheck](features/5_recheck.feature), [8_recheck_assignment](features/8_recheck_assignment.feature) |
 | Meeting brief | Pick a period and see how many fixes staff reported, how many the family verified, and each concern side by side. Print it or save it as a PDF. | [9_meeting_brief](features/9_meeting_brief.feature) |
 
 ### How the core workflow fits together
@@ -104,7 +104,7 @@ open ──staff response──> reported_fixed ──recheck──> verified �
                                └──recheck──> not_verified
 ```
 
-A new staff response moves an **Open**, **Not verified** or **Recurred** concern to **Reported fixed**. Once a fix is **Verified**, a recheck can only record that the problem came back. The relative who opened a concern can't record its recheck, and the recheck can only be assigned to another member of the family.
+A new staff response moves an **Open**, **Not verified** or **Recurred** concern to **Reported fixed**. Once a fix is **Verified**, a recheck can only record that the problem came back. The relative who opened a concern can't record its recheck, and the recheck can only be assigned, or reassigned, to another member of the family.
 
 See the rules in [CareConcern](app/models/care_concern.rb), [StaffResponse](app/models/staff_response.rb), [Recheck](app/models/recheck.rb) and [MeetingBrief](app/models/meeting_brief.rb), and the [model specs](spec/models/).
 
