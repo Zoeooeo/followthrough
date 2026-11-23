@@ -15,9 +15,9 @@ FollowThrough helps families keep track of care concerns for someone in a nursin
 
 ## Try it
 
-The quickest way is **Try a demo family** on the sign in page. It needs no account. You get your own copy of Linda Chen's family as a guest, with a recheck waiting for you, and the copy is deleted when you leave, so other visitors' clicks never change what you see.
+The quickest way is **Try a demo family** on the sign in page. It needs no account. Users get their own copy of Linda Chen's family as a guest, with a recheck waiting for them, and the copy is deleted when they leave, so other visitors' clicks never change what they see.
 
-You can also sign in with one of the shared demo accounts. All three are in Linda Chen's family. The password for each is `password123`.
+Users can also sign in with one of the shared demo accounts. All three are in Linda Chen's family. The password for each is `password123`.
 
 | Account | Role | What to try |
 | --- | --- | --- |
