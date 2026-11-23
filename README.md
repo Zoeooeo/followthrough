@@ -19,8 +19,8 @@ Sign in with one of the demo accounts. All three are in Linda Chen's family. The
 
 | Account | Role | What to try |
 | --- | --- | --- |
-| amy@example.com | Relative | The home page shows a recheck assigned to Amy. Open it, check it against the Signal Card, and record the result. |
-| david@example.com | Organizer | The Family page shows the invite code and lets David remove relatives. David opened the water cup concern, so he can't recheck it. |
+| amy@example.com | Relative | The home page shows a recheck assigned to Amy. Choose **Log a visit**, check the fix against the Signal Card, and save the visit with what she saw. |
+| david@example.com | Organizer | The Family page shows the invite code and lets David manage who has access. David opened the water cup concern, so he can't recheck it. |
 | grace@example.com | Relative | Open the Meeting brief to compare what staff reported with what the family saw. |
 
 ## Features
@@ -30,12 +30,12 @@ Iteration 1 built the core workflow. Iteration 2 adds accounts, the shared famil
 | Feature | What a user can do | User stories |
 | --- | --- | --- |
 | Accounts | Sign up, sign in and out. Every page needs an account. | [6_accounts](features/6_accounts.feature) |
-| Family space | Create a profile and become its organizer. Invite relatives with a code. Only members can see the profile. The organizer can update the facility and room, and removing a relative opens their waiting rechecks to the rest of the family. | [1_family_profile](features/1_family_profile.feature), [7_family_space](features/7_family_space.feature) |
+| Family space | Create a profile and become its organizer. Invite relatives with a code. Only members can see the profile. The organizer can update the facility and room and remove a relative's access, which opens their waiting rechecks to the rest of the family. | [1_family_profile](features/1_family_profile.feature), [7_family_space](features/7_family_space.feature) |
 | Signal Card | Add, edit, remove and search signals. Each one shows who last updated it. | [2_signal_card](features/2_signal_card.feature) |
-| Visit log | Record how the resident seemed, which signals you noticed, and notes. Open a concern from a visit. | [10_visit_log](features/10_visit_log.feature) |
+| Visit log | The one thing a visitor does. Record how the resident seemed, which signals you noticed, and notes, and check any fixes staff reported on the same form. Open a concern from a visit. | [10_visit_log](features/10_visit_log.feature) |
 | Concerns | Record a problem and what "fixed" would look like. A progress bar shows where it stands. | [3_open_concern](features/3_open_concern.feature) |
 | Staff responses | Record what staff said. The concern becomes Reported fixed and the recheck is assigned to another relative. | [4_staff_response](features/4_staff_response.feature), [8_recheck_assignment](features/8_recheck_assignment.feature) |
-| Rechecks | The assigned relative sees the recheck first on their home page and checks it with the Signal Card checklist. If plans change, any relative can reassign the recheck to someone else or open it to anyone in the family. | [5_recheck](features/5_recheck.feature), [8_recheck_assignment](features/8_recheck_assignment.feature) |
+| Rechecks | The assigned relative sees the recheck first on their home page and records it while logging a visit, using the Signal Card checklist. Each recheck links back to the visit it came from. If plans change, any relative can reassign the recheck or open it to anyone in the family. | [5_recheck](features/5_recheck.feature), [8_recheck_assignment](features/8_recheck_assignment.feature), [10_visit_log](features/10_visit_log.feature) |
 | Meeting brief | Pick a period and see how many fixes staff reported, how many the family verified, and each concern side by side. Print it or save it as a PDF. | [9_meeting_brief](features/9_meeting_brief.feature) |
 
 ### How the core workflow fits together
@@ -58,28 +58,33 @@ sequenceDiagram
     App-->>-David: Status Reported fixed, recheck assigned to Amy
 
     opt David tries to recheck his own concern
-        David->>+App: POST rechecks (signed in as David)
+        David->>+App: POST visits (signed in as David, result for his concern)
         App-->>-David: 422, must be a different relative
     end
 
     Note over David,DB: Sunday visit
     Amy->>+App: GET home page
     App->>DB: Load rechecks assigned to Amy
-    App-->>-Amy: Your rechecks, Water cup out of reach
-    Amy->>+App: GET care_concern page
-    App-->>-Amy: Recheck form with the Signal Card checklist
-    Amy->>+App: POST rechecks (signed in as Amy, result)
+    App-->>-Amy: Your rechecks, Water cup out of reach, Log a visit
+    Amy->>+App: GET new visit page
+    App-->>-Amy: Visit form with the fix to check and the Signal Card checklist
+    Amy->>+App: POST visits (mood, signals, notes, result for the water cup)
     alt The fix held
-        App->>DB: Save recheck, status verified
-        App-->>Amy: Status Verified
+        App->>DB: Save visit and recheck together, status verified
+        App-->>Amy: Visit saved with 1 recheck, status Verified
     else The fix did not hold
-        App->>DB: Save recheck, status not_verified
-        App-->>Amy: Status Not verified, staff form shown again
+        App->>DB: Save visit and recheck together, status not_verified
+        App-->>Amy: Visit saved, concern back to Waiting for staff
     end
     deactivate App
 ```
 
-Each step is covered by Cucumber: opening a concern (`3_open_concern.feature`), recording staff responses and assigning the recheck (`4_staff_response.feature`, `8_recheck_assignment.feature`), and rechecks (`5_recheck.feature`). The error case is the scenario "The relative who opened the concern cannot record its recheck" in `8_recheck_assignment.feature`.
+Each step is covered by Cucumber: opening a concern (`3_open_concern.feature`), recording staff responses and assigning the recheck (`4_staff_response.feature`, `8_recheck_assignment.feature`), and checking fixes while logging a visit (`5_recheck.feature`). The error case is the scenario "The relative who opened the concern cannot record its recheck" in `8_recheck_assignment.feature`.
+
+### Changes after iteration 2 feedback
+
+- **One action for a visitor.** Logging a visit and recording a recheck used to be two separate forms, so it was unclear which one a visitor should use. A visitor now only logs a visit. The visit form lists the fixes they can check (their own assignments first) with the Signal Card checklist, and saving the visit saves those rechecks with it. The concern page and the home page point to **Log a visit** instead of a separate recheck form, and each recheck links back to its visit.
+- **Gentler wording for access.** The organizer now chooses **Remove access** instead of removing someone from the family, and the message says the person no longer has access to the family space and can rejoin with the invite code. The browser asks the organizer to confirm before access is removed, so a mistaken click can be cancelled.
 
 ### UI sketches
 
@@ -91,7 +96,7 @@ Zoe Li drew our UI sketches by hand. They are in [docs/ui-sketches.pdf](docs/ui-
 | Concern detail and recheck | Implemented in iteration 1, progress bar and recheck assignment added in iteration 2 |
 | Family home (my rechecks first, open concerns) | Implemented in iteration 2 |
 | Family space (members, roles, invites) | Implemented in iteration 2 with invite codes |
-| Log a visit | Implemented in iteration 2 |
+| Log a visit | Implemented in iteration 2, rechecks moved onto this form after feedback |
 | Care plan meeting brief | Implemented in iteration 2 |
 
 Photo uploads from the sketches are left out because Heroku does not keep uploaded files.
