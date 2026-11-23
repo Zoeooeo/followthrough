@@ -162,14 +162,19 @@ heroku open
 
 The release command in [Procfile](Procfile) runs the migrations. If Heroku asks for `SECRET_KEY_BASE`, run `heroku config:set SECRET_KEY_BASE="$(bin/rails secret)"`.
 
-### Upgrading from iteration 1
+### Updating an existing database
 
-Iteration 2 replaces typed names with accounts, so concerns and rechecks from iteration 1 can't be carried over. Reset the database before deploying, then load the demo data again.
+This section is only about the database. The full list of what each iteration added is under [Features](#features).
+
+**From iteration 1.** Iteration 2 replaced typed names with accounts, so concerns and rechecks saved in iteration 1 can't be carried over. Reset the database before deploying, then load the demo data again.
 
 ```bash
 bin/rails db:reset                                              # local
 heroku pg:reset DATABASE_URL --confirm YOUR-APP-NAME            # Heroku, before git push heroku main
+heroku run bin/rails db:seed -a YOUR-APP-NAME                   # Heroku, after the push
 ```
+
+**Within iteration 2.** Later changes, such as linking each recheck to the visit it was recorded on, only add columns. Existing data is kept. Run `bin/rails db:migrate` locally. On Heroku the release step runs the migrations during `git push heroku main`.
 
 ## Project structure
 
