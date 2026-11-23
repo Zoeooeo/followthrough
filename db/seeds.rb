@@ -1,17 +1,18 @@
 # Sample data with three demo accounts (password: password123). Run with: bin/rails db:seed
 
-DEMO_PASSWORD = "password123".freeze
-
-def demo_user(name, email)
+# Local variables instead of a constant and a method, so the file can be loaded again
+# (for example by spec/db/seeds_spec.rb) without warnings.
+demo_password = "password123"
+demo_user = lambda do |name, email|
   User.find_or_create_by!(email: email) do |user|
     user.name = name
-    user.password = DEMO_PASSWORD
+    user.password = demo_password
   end
 end
 
-david = demo_user("David", "david@example.com")
-amy = demo_user("Amy", "amy@example.com")
-grace = demo_user("Grace", "grace@example.com")
+david = demo_user.call("David", "david@example.com")
+amy = demo_user.call("Amy", "amy@example.com")
+grace = demo_user.call("Grace", "grace@example.com")
 
 linda = Resident.find_or_create_by!(name: "Linda Chen", demo: false) do |r|
   r.facility = "Greenview Nursing Home"
