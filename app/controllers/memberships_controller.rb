@@ -16,6 +16,10 @@ class MembershipsController < ApplicationController
     if resident.nil?
       flash.now[:alert] = "That invite code doesn't match any family."
       render :new, status: :unprocessable_entity
+    elsif resident.demo? != current_user.demo?
+      # Demo families and real families never mix, so deleting a demo can't affect a real family.
+      flash.now[:alert] = current_user.demo? ? "Create an account to join a real family." : "That invite code belongs to a demo family."
+      render :new, status: :unprocessable_entity
     elsif resident.member?(current_user)
       redirect_to resident_path(resident), notice: "You're already in #{resident.name}'s family."
     else

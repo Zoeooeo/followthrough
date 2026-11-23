@@ -25,9 +25,12 @@ class ApplicationController < ActionController::Base
     return_to
   end
 
+  # A guest's demo family is deleted as soon as they leave, so it never lingers.
   def sign_out
+    guest = current_user if current_user.demo?
     reset_session
     @current_user = nil
+    DemoFamily.discard(guest) if guest
   end
 
   def require_sign_in

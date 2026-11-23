@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   get "sign_in", to: "sessions#new"
   post "sign_in", to: "sessions#create"
   delete "sign_out", to: "sessions#destroy"
+  resource :demo, only: %i[create destroy]
 
   get "join", to: "memberships#new"
   post "join", to: "memberships#create"

@@ -1,6 +1,6 @@
 # FollowThrough: Because "Fixed" Should Mean Verified
 
-FollowThrough helps families keep track of care concerns for someone in a nursing home or assisted living facility. When staff say they've fixed a problem, the family records what they said and marks the concern **Reported fixed**. On the next visit, a different relative checks the fix and records what they saw. The concern becomes **Verified** only when a relative confirms the fix.
+FollowThrough helps families keep track of care concerns for someone in a nursing home or assisted living facility. When staff say they've fixed a problem, the family records what they said and marks the concern **Reported fixed**. On the next visit, a different relative checks the fix and records what they saw as part of logging that visit. The concern becomes **Verified** only when a relative confirms the fix.
  
 **Live app:** https://followthrough-team-d64d6d9bc835.herokuapp.com/
 
@@ -15,7 +15,9 @@ FollowThrough helps families keep track of care concerns for someone in a nursin
 
 ## Try it
 
-Sign in with one of the demo accounts. All three are in Linda Chen's family. The password for each is `password123`.
+The quickest way is **Try a demo family** on the sign in page. It needs no account. You get your own copy of Linda Chen's family as a guest, with a recheck waiting for you, and the copy is deleted when you leave, so other visitors' clicks never change what you see.
+
+You can also sign in with one of the shared demo accounts. All three are in Linda Chen's family. The password for each is `password123`.
 
 | Account | Role | What to try |
 | --- | --- | --- |
@@ -32,6 +34,7 @@ Iteration 1 built the core workflow. Iteration 2 adds accounts, the shared famil
 | Accounts | Sign up, sign in and out. Every page needs an account. | [6_accounts](features/6_accounts.feature) |
 | Family space | Create a profile and become its organizer. Invite relatives with a code. Only members can see the profile. The organizer can update the facility and room and remove a relative's access, which opens their waiting rechecks to the rest of the family. | [1_family_profile](features/1_family_profile.feature), [7_family_space](features/7_family_space.feature) |
 | Signal Card | Add, edit, remove and search signals. Each one shows who last updated it. | [2_signal_card](features/2_signal_card.feature) |
+| Demo family | **Try a demo family** on the sign in page signs a visitor in as a guest with a private copy of the sample family. Leaving or signing out deletes it. Guests can't join real families and real users can't join demo ones. | [11_demo](features/11_demo.feature) |
 | Visit log | The one thing a visitor does. Record how the resident seemed, which signals you noticed, and notes, and check any fixes staff reported on the same form. Open a concern from a visit. | [10_visit_log](features/10_visit_log.feature) |
 | Concerns | Record a problem and what "fixed" would look like. A progress bar shows where it stands. | [3_open_concern](features/3_open_concern.feature) |
 | Staff responses | Record what staff said. The concern becomes Reported fixed and the recheck is assigned to another relative. | [4_staff_response](features/4_staff_response.feature), [8_recheck_assignment](features/8_recheck_assignment.feature) |
@@ -93,7 +96,7 @@ Zoe Li drew our UI sketches by hand. They are in [docs/ui-sketches.pdf](docs/ui-
 | Sketch | Status |
 | --- | --- |
 | Signal Card | Implemented in iteration 1, search and "updated by" added in iteration 2 |
-| Concern detail and recheck | Implemented in iteration 1, progress bar and recheck assignment added in iteration 2 |
+| Concern detail and recheck | Implemented in iteration 1, progress bar and recheck assignment added in iteration 2, rechecks recorded from the visit log after feedback |
 | Family home (my rechecks first, open concerns) | Implemented in iteration 2 |
 | Family space (members, roles, invites) | Implemented in iteration 2 with invite codes |
 | Log a visit | Implemented in iteration 2, rechecks moved onto this form after feedback |
@@ -129,7 +132,7 @@ Open [localhost:3000](http://localhost:3000) and sign in with a demo account fro
 
 ### Demo data
 
-All names in the sample data and tests are fictional and used only for this class demo. This includes the resident (Linda Chen), her family members (David, Amy, Grace), the staff members, and the care facility (Greenview Nursing Home). Any resemblance to real people or facilities is coincidental.
+All names in the sample data and tests are fictional and used only for this class demo. This includes the resident (Linda Chen), her family members (David, Amy, Grace), the staff members, and the care facility (Greenview Nursing Home). Any resemblance to real people or facilities is coincidental. **Try a demo family** copies the same fictional story for each guest.
 
 ## Tests
 
@@ -162,6 +165,8 @@ heroku open
 
 The release command in [Procfile](Procfile) runs the migrations. If Heroku asks for `SECRET_KEY_BASE`, run `heroku config:set SECRET_KEY_BASE="$(bin/rails secret)"`.
 
+Demo families are deleted when the guest leaves or signs out. Guests who just close the tab leave theirs behind, so delete demo accounts older than a day with `heroku run bin/rails demo:clean_up`, or add that command to Heroku Scheduler to run daily.
+
 ### Updating an existing database
 
 This section is only about the database. The full list of what each iteration added is under [Features](#features).
@@ -174,12 +179,13 @@ heroku pg:reset DATABASE_URL --confirm YOUR-APP-NAME            # Heroku, before
 heroku run bin/rails db:seed -a YOUR-APP-NAME                   # Heroku, after the push
 ```
 
-**Within iteration 2.** Later changes, such as linking each recheck to the visit it was recorded on, only add columns. Existing data is kept. Run `bin/rails db:migrate` locally. On Heroku the release step runs the migrations during `git push heroku main`.
+**Within iteration 2.** Later changes, such as linking each recheck to the visit it was recorded on and marking demo families, only add columns. Existing data is kept. Run `bin/rails db:migrate` locally. On Heroku the release step runs the migrations during `git push heroku main`.
 
 ## Project structure
 
 ```
-app/models/          User, Membership, Resident, SignalItem, Visit, CareConcern, StaffResponse, Recheck, MeetingBrief
+app/models/          User, Membership, Resident, SignalItem, Visit, CareConcern, StaffResponse, Recheck, MeetingBrief,
+                     DemoFamily (builds and deletes each guest's sample family)
 app/controllers/     Resource controllers. Family records are nested under /residents/:resident_id
                      and only load for members of that family.
 app/views/           Server-rendered pages, no JavaScript required
@@ -187,6 +193,7 @@ db/migrate/          Table definitions
 features/            Cucumber user stories and step definitions
 spec/models/         Validation, permission and status-rule tests
 spec/requests/       HTTP request tests, including sign-in and family access
+lib/tasks/demo.rake  bin/rails demo:clean_up deletes demo families older than a day
 ```
 
 ## References

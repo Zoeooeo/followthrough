@@ -1,7 +1,7 @@
 Feature: Sign up and sign in
   As a relative
   So that only my family can see my mother's care records
-  I want my own account and to sign in before seeing anything
+  I want my own account and to sign in before seeing any real family's records
 
   Scenario: Sign up
     Given I am on the sign up page

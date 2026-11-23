@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_11_23_000001) do
+ActiveRecord::Schema[7.2].define(version: 2026_11_23_000002) do
   create_table "care_concerns", force: :cascade do |t|
     t.integer "resident_id", null: false
     t.integer "signal_item_id"
@@ -61,6 +61,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_23_000001) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "invite_code", null: false
+    t.boolean "demo", default: false, null: false
     t.index ["invite_code"], name: "index_residents_on_invite_code", unique: true
   end
 
@@ -101,6 +102,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_23_000001) do
     t.string "password_digest", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "demo", default: false, null: false
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 

@@ -23,6 +23,7 @@
       .muted { color: var(--muted); }
       .flash { padding: 10px 14px; border-radius: 6px; border: 2px solid; }
       .flash.notice { border-color: var(--green); background: #eaf4ee; }
+      .flash.demo { border-color: var(--blue); background: #eef3fa; margin-bottom: 12px; }
       .flash.alert, .errors { border: 2px solid var(--red); background: #fbe9e6; padding: 10px 14px; border-radius: 6px; }
       .errors ul { margin: 4px 0 0; }
       .disclaimer { border: 1.5px dashed #777; background: #fff; padding: 8px 12px; border-radius: 6px; }
@@ -114,6 +115,12 @@
     </header>
 
     <main>
+      <% if signed_in? && current_user.demo? %>
+        <div id="demo-banner" class="flash demo" role="note">
+          <p style="margin-top: 0">You're exploring a demo family. The other relatives are made up, and nothing here is shared.</p>
+          <%= button_to "Leave the demo and sign up", demo_path, method: :delete, class: "secondary" %>
+        </div>
+      <% end %>
       <% if notice.present? %>
         <p class="flash notice" role="status"><%= notice %></p>
       <% end %>

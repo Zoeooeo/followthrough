@@ -15,7 +15,8 @@ class ResidentsController < ApplicationController
   end
 
   def create
-    @resident = Resident.new(resident_params)
+    # A profile made while exploring the demo is part of the demo and is deleted with it.
+    @resident = Resident.new(resident_params.merge(demo: current_user.demo?))
     @resident.memberships.build(user: current_user, role: "organizer")
 
     if @resident.save
