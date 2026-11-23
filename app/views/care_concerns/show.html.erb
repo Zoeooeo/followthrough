@@ -6,7 +6,6 @@
 <%= render "care_concerns/progress", concern: @care_concern %>
 
 <%= render "shared/errors", record: @staff_response %>
-<%= render "shared/errors", record: @recheck %>
 <%= render "shared/errors", record: @failed_assignment %>
 
 <dl>
@@ -51,37 +50,26 @@
       <p style="margin: 0">You opened this concern, so another relative needs to recheck it.</p>
     </section>
   <% else %>
-    <section id="recheck-form" class="panel">
-      <h2 style="margin-top: 0">Record a recheck</h2>
+    <%# Rechecks are recorded when logging a visit, so the concern page sends the relative there. %>
+    <section id="recheck-prompt" class="panel">
+      <% if @care_concern.status_verified? %>
+        <h2 style="margin-top: 0">Did the problem come back?</h2>
+        <p>The family verified this fix. If you see the problem again, mark it when you log your visit.</p>
+      <% else %>
+        <h2 style="margin-top: 0">Check it on your next visit</h2>
+        <p>Staff say this is fixed. Look for it when you visit, then record what you saw when you log the visit.</p>
+      <% end %>
 
       <% if @care_concern.signal_item %>
         <p class="label"><strong>Check for (from the Signal Card)</strong></p>
-        <ul id="recheck-checklist">
+        <ul class="recheck-checklist">
           <% @care_concern.signal_item.checklist.each do |item| %>
             <li><%= item %></li>
           <% end %>
         </ul>
       <% end %>
 
-      <%= form_with model: @recheck, url: resident_care_concern_rechecks_path(@resident, @care_concern) do |form| %>
-        <fieldset class="field">
-          <legend><strong>What did you see?</strong></legend>
-          <% @care_concern.allowed_recheck_results.each do |result| %>
-            <div class="radio">
-              <%= form.radio_button :result, result %>
-              <%= form.label "result_#{result}", result.humanize %>
-            </div>
-          <% end %>
-        </fieldset>
-
-        <div class="field">
-          <%= form.label :note %>
-          <%= form.text_area :note %>
-        </div>
-
-        <p class="hint">Saved as checked by <%= current_user.name %>.</p>
-        <%= form.submit "Save recheck" %>
-      <% end %>
+      <p><%= link_to "Log a visit", new_resident_visit_path(@resident, anchor: dom_id(@care_concern, :check)), class: "button" %></p>
     </section>
   <% end %>
 <% end %>
@@ -140,7 +128,12 @@
         </li>
       <% else %>
         <li class="family" id="<%= dom_id(entry) %>">
-          <span class="who">Family saw · <%= entry.checked_by.name %> · <%= short_date(entry.created_at) %></span><br>
+          <span class="who">
+            Family saw · <%= entry.checked_by.name %> · <%= short_date(entry.created_at) %>
+            <% if entry.visit %>
+              · <%= link_to "during the visit on #{short_date(entry.visit.visited_on)}", resident_visit_path(@resident, entry.visit) %>
+            <% end %>
+          </span><br>
           <strong><%= entry.result_label %></strong><%= ". #{entry.note}" if entry.note.present? %>
         </li>
       <% end %>

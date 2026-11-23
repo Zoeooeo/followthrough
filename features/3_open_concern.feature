@@ -38,4 +38,4 @@ Feature: Open a concern after a visit
     Given "Linda Chen" has a concern "Water cup out of reach" opened by "Amy"
     When I go to the concern page for "Water cup out of reach"
     Then I should see the staff response form
-    And I should not see the recheck form
+    And I should not be asked to check it on a visit

@@ -30,7 +30,8 @@ Feature: Assign each recheck to another relative
     When I go to the home page
     Then I should see "Water cup out of reach" in my rechecks
     When I start the recheck for "Water cup out of reach"
-    Then I should see the recheck form
+    Then I should see "Water cup out of reach" in the visit checks
+    And I should see "1 recheck for you on this visit"
 
   Scenario: Other relatives do not get someone else's recheck
     Given "Grace" is in the family of "Linda Chen"
@@ -45,8 +46,10 @@ Feature: Assign each recheck to another relative
     Given staff reported "Water cup out of reach" as fixed and assigned the recheck to "Amy"
     And I am signed in as "David"
     When I go to the concern page for "Water cup out of reach"
-    Then I should not see the recheck form
+    Then I should not be asked to check it on a visit
     And I should see "You opened this concern, so another relative needs to recheck it."
+    When I go to the new visit page for "Linda Chen"
+    Then I should not see "Water cup out of reach" in the visit checks
 
   Scenario: A family of one is asked to invite someone
     Given a resident "Robert Lee" exists

@@ -4,17 +4,6 @@
 <h1>Log a visit</h1>
 <p class="muted"><%= @resident.name %> · visited by <%= current_user.name %></p>
 
-<% if @my_rechecks.any? %>
-  <section id="visit-rechecks" class="panel">
-    <p style="margin-top: 0"><strong><%= pluralize(@my_rechecks.size, "recheck") %> for you on this visit</strong></p>
-    <ul>
-      <% @my_rechecks.each do |concern| %>
-        <li><%= link_to concern.title, resident_care_concern_path(@resident, concern) %></li>
-      <% end %>
-    </ul>
-  </section>
-<% end %>
-
 <%= render "shared/errors", record: @visit %>
 
 <%= form_with model: [@resident, @visit] do |form| %>
@@ -47,6 +36,30 @@
     <%= form.label :notes %>
     <%= form.text_area :notes, placeholder: "e.g. Hands tucked under her arms. Window was open. Ate most of lunch." %>
   </div>
+
+  <% if @waiting_checks.any? || @verified_checks.any? %>
+    <section id="visit-rechecks" class="panel">
+      <h2 style="margin-top: 0">Check fixes on this visit</h2>
+      <% if @my_recheck_count.positive? %>
+        <p><strong><%= pluralize(@my_recheck_count, "recheck") %> for you on this visit</strong></p>
+      <% end %>
+
+      <% if @waiting_checks.any? %>
+        <p class="hint">Staff say these are fixed. Look for each one and choose what you saw, or leave "Didn't check".</p>
+        <% @waiting_checks.each do |concern| %>
+          <%= render "visits/check", concern: concern %>
+        <% end %>
+      <% end %>
+
+      <% if @verified_checks.any? %>
+        <h3>Already verified</h3>
+        <p class="hint">Only mark one of these if the problem came back.</p>
+        <% @verified_checks.each do |concern| %>
+          <%= render "visits/check", concern: concern %>
+        <% end %>
+      <% end %>
+    </section>
+  <% end %>
 
   <%= form.submit "Save visit" %>
 <% end %>

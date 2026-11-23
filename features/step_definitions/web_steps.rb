@@ -44,7 +44,15 @@ When("I fill in the invite code for {string}") do |resident_name|
 end
 
 When("I start the recheck for {string}") do |title|
-  within("##{dom_id(CareConcern.find_by!(title: title), :my_recheck)}") { click_link "Start check" }
+  within("##{dom_id(concern_titled(title), :my_recheck)}") { click_link "Log a visit" }
+end
+
+When("I mark {string} as {string}") do |title, choice|
+  within("##{dom_id(concern_titled(title), :check)}") { choose choice }
+end
+
+When("I add the note {string} for {string}") do |note, title|
+  within("##{dom_id(concern_titled(title), :check)}") { fill_in "Note", with: note }
 end
 
 Then("I should see {string}") do |text|
@@ -91,7 +99,7 @@ Then("I should not see {string} in my rechecks") do |title|
 end
 
 Then("I should see {string} in the recheck checklist") do |item|
-  within("#recheck-checklist") { expect(page).to have_content(item) }
+  expect(page).to have_css(".recheck-checklist li", text: item)
 end
 
 Then("I should see {string} in the recent visits") do |text|
@@ -125,12 +133,20 @@ Then("the brief row for {string} should show {string}") do |title, text|
   within("##{dom_id(CareConcern.find_by!(title: title), :brief)}") { expect(page).to have_content(text) }
 end
 
-Then("I should see the recheck form") do
-  expect(page).to have_css("#recheck-form")
+Then("I should see {string} in the visit checks") do |title|
+  within("#visit-rechecks") { expect(page).to have_content(title) }
 end
 
-Then("I should not see the recheck form") do
-  expect(page).not_to have_css("#recheck-form")
+Then("I should not see {string} in the visit checks") do |title|
+  expect(page).not_to have_css("##{dom_id(concern_titled(title), :check)}")
+end
+
+Then("I should be asked to check it on a visit") do
+  expect(page).to have_css("#recheck-prompt")
+end
+
+Then("I should not be asked to check it on a visit") do
+  expect(page).not_to have_css("#recheck-prompt")
 end
 
 Then("I should see the staff response form") do

@@ -5,7 +5,7 @@
 <section id="my-rechecks" class="panel">
   <h2 style="margin-top: 0">Your rechecks</h2>
   <% if @my_rechecks.any? %>
-    <p class="hint">Staff say these are fixed. You were asked to check them on your next visit.</p>
+    <p class="hint">Staff say these are fixed. You were asked to check them on your next visit. Record what you saw when you log the visit.</p>
     <ul class="list">
       <% @my_rechecks.each do |concern| %>
         <li id="<%= dom_id(concern, :my_recheck) %>">
@@ -13,7 +13,7 @@
             <strong><%= concern.title %></strong><br>
             <span class="muted"><%= concern.resident.name %> · opened by <%= concern.opened_by.name %></span>
           </span>
-          <%= link_to "Start check", resident_care_concern_path(concern.resident, concern), class: "button" %>
+          <%= link_to "Log a visit", new_resident_visit_path(concern.resident, anchor: dom_id(concern, :check)), class: "button" %>
         </li>
       <% end %>
     </ul>

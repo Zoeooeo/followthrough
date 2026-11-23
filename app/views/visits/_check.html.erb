@@ -1,0 +1,34 @@
+<%# One reported fix on the visit form. A blank choice means the relative didn't check it this time. %>
+<% choice = @recheck_choices.fetch(concern.id, {}) %>
+<fieldset class="field check" id="<%= dom_id(concern, :check) %>">
+  <legend>
+    <strong><%= link_to concern.title, resident_care_concern_path(@resident, concern) %></strong>
+    <%= status_badge(concern) %>
+    <% if concern.status_reported_fixed? && concern.assigned_to == current_user %>
+      <span class="muted">· assigned to you</span>
+    <% end %>
+  </legend>
+
+  <% if concern.signal_item %>
+    <p class="label">Check for (from the Signal Card)</p>
+    <ul class="recheck-checklist">
+      <% concern.signal_item.checklist.each do |item| %>
+        <li><%= item %></li>
+      <% end %>
+    </ul>
+  <% end %>
+
+  <% options = concern.allowed_recheck_results.map { |result| [result, Recheck::CHOICES[result]] } + [["", "Didn't check"]] %>
+  <% options.each do |value, label| %>
+    <% field_id = "visit_rechecks_#{concern.id}_result_#{value.presence || 'skip'}" %>
+    <div class="radio">
+      <%= radio_button_tag "visit[rechecks][#{concern.id}][result]", value, choice[:result].to_s == value, id: field_id %>
+      <%= label_tag field_id, label %>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= label_tag "visit_rechecks_#{concern.id}_note", "Note" %>
+    <%= text_field_tag "visit[rechecks][#{concern.id}][note]", choice[:note], id: "visit_rechecks_#{concern.id}_note" %>
+  </div>
+</fieldset>

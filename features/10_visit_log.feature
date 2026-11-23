@@ -1,7 +1,7 @@
 Feature: Log a visit
   As a relative who just visited Mom
-  So that the next visitor knows how she has been
-  I want to record how she seemed, which signals I noticed, and what I saw
+  So that the next visitor knows how she has been and whether reported fixes held
+  I want to record how she seemed, which signals I noticed, what I saw, and which fixes I checked, all in one visit log
 
   Background:
     Given I am signed in as "Amy"
@@ -54,4 +54,8 @@ Feature: Log a visit
     And staff reported "Water cup out of reach" as fixed and assigned the recheck to "Amy"
     When I go to the new visit page for "Linda Chen"
     Then I should see "1 recheck for you on this visit"
-    And I should see "Water cup out of reach"
+    And I should see "Water cup out of reach" in the visit checks
+
+  Scenario: A visit with nothing to check has no recheck section
+    When I go to the new visit page for "Linda Chen"
+    Then I should not see "Check fixes on this visit"

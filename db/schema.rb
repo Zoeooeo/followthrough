@@ -1,8 +1,16 @@
 # This file is auto-generated from the current state of the database. Instead
 # of editing this file, please use the migrations feature of Active Record to
 # incrementally modify your database, and then regenerate this schema definition.
+#
+# This file is the source Rails uses to define your schema when running `bin/rails
+# db:schema:load`. When creating a new database, `bin/rails db:schema:load` tends to
+# be faster and is potentially less error prone than running all of your
+# migrations from scratch. Old migrations may fail to apply correctly if those
+# migrations use external dependencies or application code.
+#
+# It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_11_22_000006) do
+ActiveRecord::Schema[7.2].define(version: 2026_11_23_000001) do
   create_table "care_concerns", force: :cascade do |t|
     t.integer "resident_id", null: false
     t.integer "signal_item_id"
@@ -40,8 +48,10 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_22_000006) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "checked_by_id", null: false
+    t.integer "visit_id"
     t.index ["care_concern_id"], name: "index_rechecks_on_care_concern_id"
     t.index ["checked_by_id"], name: "index_rechecks_on_checked_by_id"
+    t.index ["visit_id"], name: "index_rechecks_on_visit_id"
   end
 
   create_table "residents", force: :cascade do |t|
@@ -115,6 +125,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_22_000006) do
   add_foreign_key "memberships", "users"
   add_foreign_key "rechecks", "care_concerns"
   add_foreign_key "rechecks", "users", column: "checked_by_id"
+  add_foreign_key "rechecks", "visits", on_delete: :nullify
   add_foreign_key "signal_items", "residents"
   add_foreign_key "signal_items", "users", column: "updated_by_id"
   add_foreign_key "staff_responses", "care_concerns"

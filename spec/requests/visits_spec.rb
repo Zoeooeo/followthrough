@@ -18,12 +18,128 @@ RSpec.describe "Visits", type: :request do
       expect(response.body).to include("Log a visit", "How was Linda Chen today?", "Thirst", "Save visit")
     end
 
-    it "lists the rechecks assigned to me for this resident" do
-      report_fixed(create_concern(resident, title: "Water cup out of reach"), recheck_assignee: amy)
+    it "has no recheck section when nothing is waiting" do
+      get new_resident_visit_path(resident)
+      expect(response.body).not_to include("Check fixes on this visit")
+    end
+  end
+
+  describe "checking fixes on a visit" do
+    let(:david) { user_named("David") }
+    let!(:water) { create_concern(resident, title: "Water cup out of reach", opened_by: david, signal_item: thirst) }
+
+    before { report_fixed(water, recheck_assignee: amy) }
+
+    def post_visit(rechecks, mood: "okay")
+      post resident_visits_path(resident),
+           params: { visit: { visited_on: Date.current.to_s, mood: mood, rechecks: rechecks } }
+    end
+
+    it "lists my rechecks first, then other reported fixes, then verified ones, but never concerns I opened" do
+      blanket = create_concern(resident, title: "Blanket missing", opened_by: david)
+      report_fixed(blanket)
+      glasses = create_concern(resident, title: "Glasses not cleaned", opened_by: david)
+      report_fixed(glasses)
+      record_recheck(glasses, result: "verified", checked_by: user_named("Grace"))
+      report_fixed(create_concern(resident, title: "Room too cold", opened_by: amy))
 
       get new_resident_visit_path(resident)
 
-      expect(response.body).to include("1 recheck for you on this visit", "Water cup out of reach")
+      body = response.body
+      expect(body).to include("Check fixes on this visit", "1 recheck for you on this visit", "assigned to you",
+                              "Cup within reach", "Fixed", "Still not fixed", "Didn&#39;t check",
+                              "Already verified", "It came back")
+      expect(body.index("Water cup out of reach")).to be < body.index("Blanket missing")
+      expect(body.index("Blanket missing")).to be < body.index("Glasses not cleaned")
+      expect(body).not_to include("Room too cold")
+    end
+
+    it "saves the visit and the recheck together" do
+      expect {
+        post_visit({ water.id => { result: "verified", note: "Cup on the right, half full" } })
+      }.to change(Visit, :count).by(1).and change(Recheck, :count).by(1)
+
+      recheck = Recheck.last
+      expect(recheck.checked_by).to eq(amy)
+      expect(recheck.visit).to eq(Visit.last)
+      expect(water.reload).to be_status_verified
+      expect(flash[:notice]).to eq("Visit saved with 1 recheck.")
+      follow_redirect!
+      expect(response.body).to include("Fixes checked on this visit", "Water cup out of reach",
+                                       "Fixed. Cup on the right, half full")
+
+      get resident_care_concern_path(resident, water)
+      expect(response.body).to include("Family saw · Amy", "during the visit on")
+    end
+
+    it "records that a fix did not hold" do
+      post_visit({ water.id => { result: "not_verified" } })
+
+      expect(water.reload).to be_status_not_verified
+      follow_redirect!
+      expect(response.body).to include("Still not fixed")
+    end
+
+    it "records nothing for a fix the visitor didn't check" do
+      expect {
+        post_visit({ water.id => { result: "", note: "" } })
+      }.to change(Visit, :count).by(1).and change(Recheck, :count).by(0)
+
+      expect(water.reload).to be_status_reported_fixed
+      expect(flash[:notice]).to eq("Visit saved.")
+    end
+
+    it "reopens a verified concern as Recurred" do
+      record_recheck(water, result: "verified", checked_by: user_named("Grace"))
+
+      post_visit({ water.id => { result: "recurred" } })
+
+      expect(water.reload).to be_status_recurred
+    end
+
+    it "keeps nothing when a recheck is not allowed, and names the concern in the error" do
+      own = create_concern(resident, title: "Room too cold", opened_by: amy)
+      report_fixed(own)
+
+      expect {
+        post_visit({ water.id => { result: "verified" }, own.id => { result: "verified" } })
+      }.not_to change(Recheck, :count)
+
+      expect(Visit.count).to eq(0)
+      expect(response).to have_http_status(422)
+      expect(response.body).to include(
+        "Room too cold: Checked by must be a different relative than Amy, who opened this concern"
+      )
+      expect(water.reload).to be_status_reported_fixed
+      expect(response.body).to include(%(id="visit_rechecks_#{water.id}_result_verified" value="verified" checked="checked"))
+    end
+
+    it "rejects a result that doesn't fit the concern's status" do
+      post_visit({ water.id => { result: "recurred" } })
+
+      expect(response).to have_http_status(422)
+      expect(response.body).to include("Water cup out of reach: Recurred can&#39;t be recorded while the concern is Reported fixed")
+    end
+
+    it "does not record a recheck when the visit itself is invalid" do
+      expect {
+        post_visit({ water.id => { result: "verified", note: "Looks good" } }, mood: "")
+      }.not_to change(Recheck, :count)
+
+      expect(response).to have_http_status(422)
+      expect(response.body).to include("Mood must be Good, Okay, or Not good", "Looks good")
+      expect(water.reload).to be_status_reported_fixed
+    end
+
+    it "ignores concerns from another family and badly formed choices" do
+      other = create_concern(create_resident(name: "Robert Lee"), opened_by: david)
+      report_fixed(other)
+
+      expect {
+        post_visit({ other.id => { result: "verified" }, water.id => "verified" })
+      }.to change(Visit, :count).by(1).and change(Recheck, :count).by(0)
+
+      expect(other.reload).to be_status_reported_fixed
     end
   end
 

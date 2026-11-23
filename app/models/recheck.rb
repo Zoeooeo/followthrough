@@ -1,10 +1,13 @@
-# A relative's check on a later visit. It must be someone in the family
-# other than the relative who opened the concern.
+# A relative's check on a later visit, recorded as part of logging that visit.
+# It must be someone in the family other than the relative who opened the concern.
 class Recheck < ApplicationRecord
   RESULTS = %w[verified not_verified recurred].freeze
+  # How each result is worded on the visit form, where relatives choose what they saw.
+  CHOICES = { "verified" => "Fixed", "not_verified" => "Still not fixed", "recurred" => "It came back" }.freeze
 
   belongs_to :care_concern
   belongs_to :checked_by, class_name: "User"
+  belongs_to :visit, optional: true
 
   validates :result, inclusion: { in: RESULTS, message: "must be Verified, Not verified, or Recurred" }
   validate :result_fits_concern_status, :checked_by_another_relative, on: :create

@@ -10,7 +10,7 @@ RSpec.describe "Home page", type: :request do
     get root_path
 
     expect(response).to have_http_status(:ok)
-    expect(response.body).to include("Your rechecks", "Start check", "Water cup out of reach", "Room too cold",
+    expect(response.body).to include("Your rechecks", "Log a visit", "Water cup out of reach", "Room too cold",
                                      "Recheck: You", "Linda Chen")
   end
 

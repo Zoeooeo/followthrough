@@ -21,6 +21,23 @@
   <% end %>
 </dl>
 
+<% rechecks = @visit.rechecks.includes(:care_concern).order(:created_at) %>
+<% if rechecks.any? %>
+  <section id="visit-checks">
+    <h2>Fixes checked on this visit</h2>
+    <ul class="list">
+      <% rechecks.each do |recheck| %>
+        <li id="<%= dom_id(recheck) %>">
+          <span>
+            <%= link_to recheck.care_concern.title, resident_care_concern_path(@resident, recheck.care_concern) %><br>
+            <span class="muted"><%= Recheck::CHOICES[recheck.result] %><%= ". #{recheck.note}" if recheck.note.present? %></span>
+          </span>
+        </li>
+      <% end %>
+    </ul>
+  </section>
+<% end %>
+
 <section id="visit-concerns">
   <h2>Concerns from this visit</h2>
   <% concerns = @visit.care_concerns.order(:created_at) %>

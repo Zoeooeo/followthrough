@@ -102,7 +102,7 @@ RSpec.describe "Concerns", type: :request do
       amy_option = response.body[%r{<option[^>]*value="#{amy.id}"[^>]*>Amy</option>}] ||
                    response.body[%r{<option[^>]*selected[^>]*value="#{amy.id}"[^>]*>Amy</option>}]
       expect(amy_option).to include("selected")
-      expect(response.body).not_to include("Record a recheck")
+      expect(response.body).not_to include("Check it on your next visit")
     end
 
     it "asks a family of one to invite another relative" do
@@ -115,16 +115,28 @@ RSpec.describe "Concerns", type: :request do
       expect(response.body).not_to include("Who should recheck")
     end
 
-    it "shows the recheck form with the Signal Card checklist to another relative" do
+    it "sends another relative to the visit log with the Signal Card checklist" do
       report_fixed(concern, recheck_assignee: amy)
       delete sign_out_path
       sign_in_as(amy)
 
       get resident_care_concern_path(resident, concern)
 
-      expect(response.body).to include("Record a recheck", "Check for (from the Signal Card)", "Cup within reach",
-                                       "Recheck assigned to Amy", "Saved as checked by Amy")
+      expect(response.body).to include("Check it on your next visit", "Check for (from the Signal Card)", "Cup within reach",
+                                       "Recheck assigned to Amy", "Log a visit")
+      expect(response.body).to include(new_resident_visit_path(resident, anchor: "check_care_concern_#{concern.id}"))
       expect(response.body).not_to include("Record what staff said")
+    end
+
+    it "asks whether a verified problem came back" do
+      report_fixed(concern)
+      record_recheck(concern, result: "verified", checked_by: amy)
+      delete sign_out_path
+      sign_in_as(amy)
+
+      get resident_care_concern_path(resident, concern)
+
+      expect(response.body).to include("Did the problem come back?")
     end
 
     it "tells the relative who opened the concern that someone else must recheck it" do
@@ -133,7 +145,7 @@ RSpec.describe "Concerns", type: :request do
       get resident_care_concern_path(resident, concern)
 
       expect(response.body).to include("You opened this concern, so another relative needs to recheck it.")
-      expect(response.body).not_to include("Record a recheck")
+      expect(response.body).not_to include("Check it on your next visit")
     end
 
     it "links back to the visit the concern came from" do

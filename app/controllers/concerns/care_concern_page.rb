@@ -1,5 +1,5 @@
 # Shared setup for the concern page, which the staff response and recheck
-# forms re-render when a submission has errors.
+# assignment forms re-render when a submission has errors.
 module CareConcernPage
   private
 
@@ -10,6 +10,5 @@ module CareConcernPage
   def prepare_care_concern_page
     @assignee_options = @resident.members_other_than(@care_concern.opened_by).to_a
     @staff_response ||= StaffResponse.new(said_on: Date.current, recheck_assignee_id: @assignee_options.first&.id)
-    @recheck ||= Recheck.new
   end
 end

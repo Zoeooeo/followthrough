@@ -66,6 +66,35 @@ RSpec.describe Visit, type: :model do
     expect(resident.visits.recent_first).to eq([newer, older])
   end
 
+  describe "rechecks recorded on the visit" do
+    let(:david) { user_named("David") }
+    let(:concern) { create_concern(resident, title: "Water cup out of reach", opened_by: david) }
+
+    before { report_fixed(concern) }
+
+    it "is invalid when a new recheck is invalid, and names the concern" do
+      visit = build_visit
+      visit.rechecks.build(care_concern: concern, checked_by: david, result: "verified")
+
+      expect(visit).not_to be_valid
+      expect(visit.errors.full_messages).to include(
+        "Water cup out of reach: Checked by must be a different relative than David, who opened this concern"
+      )
+    end
+
+    it "keeps its rechecks when the visit is deleted" do
+      visit = build_visit
+      visit.rechecks.build(care_concern: concern, checked_by: amy, result: "verified")
+      visit.save!
+
+      recheck = visit.rechecks.first
+      visit.destroy
+
+      expect(recheck.reload.visit).to be_nil
+      expect(concern.reload).to be_status_verified
+    end
+  end
+
   it "keeps concerns opened during a deleted visit" do
     visit = create_visit(resident, user: amy)
     concern = create_concern(resident, visit: visit)
